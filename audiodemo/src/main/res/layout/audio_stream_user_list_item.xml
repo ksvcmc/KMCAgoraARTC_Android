@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical" android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+    <ImageView
+        android:id="@+id/imgv_fans"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:src="@mipmap/user_image"
+        android:background="#00ffffff"
+        android:layout_marginBottom="9dp"
+        android:layout_marginRight="9dp"
+        />
+    <ImageView
+        android:id="@+id/imgv_fans_status"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@mipmap/audio_voip_connect"
+        android:layout_gravity="end|bottom"
+        />
+</FrameLayout>

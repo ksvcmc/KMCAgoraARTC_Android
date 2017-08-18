@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@mipmap/audio_chat_back"
+    android:orientation="vertical">
+
+    <TextView
+        android:id="@+id/tv_chat_title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="@dimen/activity_audio_chat_title_margin"
+        android:layout_marginTop="@dimen/activity_audio_chat_title_top"
+        android:layout_marginRight="30dp"
+        android:ellipsize="end"
+        android:maxLines="1"
+        android:text="@string/audio_chat_title"
+        android:textColor="#ffffff"
+        android:textSize="@dimen/font_size_36px" />
+
+    <ImageView
+        android:id="@+id/imgv_close"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
+        android:layout_marginRight="@dimen/activity_audio_chat_title_margin"
+        android:layout_marginTop="@dimen/activity_audio_chat_title_top"
+        android:src="@mipmap/close_stream" />
+
+    <ImageView
+        android:id="@+id/imgv_chat_close"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="20dp"
+        android:src="@mipmap/audio_chat_close" />
+
+    <com.ksyun.mc.AgoraARTCDemo.ui.AudioLinkListView
+        android:id="@+id/audio_user_list"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_above="@id/imgv_chat_close"
+        android:layout_below="@id/tv_chat_title"
+        android:layout_marginBottom="20dp"
+        android:layout_marginTop="20dp"></com.ksyun.mc.AgoraARTCDemo.ui.AudioLinkListView>
+</RelativeLayout>

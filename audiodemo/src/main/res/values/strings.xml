@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="camera_error_title">相机异常</string>
+    <string name="cannot_connect_camera">无法连接相机，请在系统设置里修改权限</string>
+    <string name="camera_disabled">相机不可用</string>
+
+    <string name="app_name">魔方音频连麦</string>
+    <string name="hello_world">Hello world!</string>
+    <string name="click_to_shoot">开始直播</string>
+    <string name="start_recording">开始录制</string>
+    <string name="capture_thumbnail">截屏</string>
+    <string name="start_rtc">开始RTC</string>
+    <string name="beauty_switcher">美颜</string>
+    <string name="watermark">水印</string>
+    <string name="mute">静音</string>
+    <string name="bgm">bgm</string>
+    <string name="audio_filter_selected">音频滤镜</string>
+    <string name="ear_mirror">耳返</string>
+    <string name="pip">画中画</string>
+    <string name="stop_pip">停止画中画</string>
+    <string name="flash">Flash</string>
+    <string name="picture_pip">图片画中画</string>
+    <string name="stop_picture_pip">停止图片画中画</string>
+    <string name="front_mirror">前置镜像</string>
+    <string name="audio_only">音频推流</string>
+
+    <!-- Get your own app id at https://dashboard.agora.io/ -->
+    <!--#YOUR APP ID#-->
+    <string name="app_id">e58027d14ffa40c18deaab1754e2fc37</string>
+    <string name="audio_stream_time">正在直播  %s</string>
+    <string name="audio_chat_title">房间名： %s</string>
+
+    <string name="explain">
+        声网语音连麦分为直播场景和聊天室场景，demo中，
+        直播场景可推流，最多支持1位主播对3位听众；
+        聊天室场景不支持推流，最多支持6人语音连麦。\n
+        声网语音连麦可运用在金山云直播SDK上，
+        其他SDK需要根据其开放性决定。\n\n\n
+        使用说明：\n
+        \u3000\u30001.多人输入相同标题，即可进入相同房间；\n
+        \u3000\u30002.聊天室场景下进入房间即可连麦；\n
+        \u3000\u3000&#160;&#160;直播场景下听众点击电话按钮即可与主播连麦；\n
+        \n
+        若想进一步了解请联系我们\n
+        邮件：KSC-VBU-KMC@kingsoft.com
+    </string>
+
+</resources>

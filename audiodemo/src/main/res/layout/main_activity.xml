@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#000000">
+
+    <TextView
+        android:id="@+id/tv_title"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="60dp"
+        android:gravity="center"
+        android:text="声网语音连麦demo"
+        android:textColor="#ffffffff"
+        android:textSize="@dimen/font_size_40px"
+        android:textStyle="bold" />
+
+    <EditText
+        android:id="@+id/audio_chat_channel_name"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:layout_below="@id/tv_title"
+        android:layout_centerHorizontal="true"
+        android:layout_marginLeft="15dp"
+        android:layout_marginRight="15dp"
+        android:layout_marginTop="40dp"
+        android:background="#1e2438"
+        android:inputType="text"
+        android:digits="0123456789abcdefghigklmnopqrstuvwxyzABCDEFGHIGKLMNOPQRSTUVWXYZ._-*"
+        android:gravity="center"
+        android:cursorVisible="false"
+        android:hint="#多人输入相同标题即可进行语音连麦#"
+        android:imeOptions="actionDone"
+        android:textColor="@color/font_color_white"
+        android:singleLine="true"
+        android:minLines="1"
+        android:maxLength="31"
+        android:textColorHint="#6e7884"
+        android:textSize="@dimen/font_size_26px" />
+
+    <Button
+        android:id="@+id/audio_chat_start_button"
+        android:layout_width="150dp"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/audio_chat_channel_name"
+        android:layout_centerHorizontal="true"
+        android:layout_gravity="center"
+        android:layout_marginTop="38dp"
+        android:background="@drawable/corner"
+        android:text=" 进入聊天室语音连麦"
+        android:textColor="@color/font_color_white"
+        android:textSize="@dimen/font_size_26px" />
+
+    <Button
+        android:id="@+id/audio_stream_start_button"
+        android:layout_width="150dp"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/audio_chat_start_button"
+        android:layout_centerHorizontal="true"
+        android:layout_gravity="center"
+        android:layout_marginTop="38dp"
+        android:background="@drawable/corner"
+        android:text=" 进入直播语音连麦"
+        android:textColor="@color/font_color_white"
+        android:textSize="@dimen/font_size_26px" />
+
+    <TextView
+        android:id="@+id/btn_explain"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="15dp"
+        android:drawableLeft="@mipmap/explain"
+        android:drawablePadding="5dp"
+        android:gravity="center"
+        android:text="Demo说明"
+        android:textColor="@color/font_color_white"
+        android:textSize="@dimen/font_size_22px" />
+</RelativeLayout>
