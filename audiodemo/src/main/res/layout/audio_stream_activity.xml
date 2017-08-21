@@ -44,11 +44,11 @@
         android:layout_below="@id/imgv_userName"
         android:layout_marginLeft="@dimen/activity_audio_stream_title_margin"
         android:layout_marginTop="@dimen/activity_audio_stream_time_top_margin"
-        android:background="#FF4C261B"
+        android:background="#00000000"
         android:drawableLeft="@mipmap/stream_ing_status"
         android:drawablePadding="12dp"
         android:text="@string/audio_stream_time"
-        android:textColor="#bbffffff" />
+        android:textColor="#ffffffff" />
 
 
     <ImageView

@@ -1,9 +1,14 @@
 package com.ksyun.mc.AgoraARTCDemo;
 
+import android.Manifest;
 import android.app.Activity;
 import android.content.Context;
+import android.content.pm.PackageManager;
+import android.os.Build;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.v4.app.ActivityCompat;
 import android.view.View;
 import android.view.WindowManager;
 import android.view.inputmethod.InputMethodManager;
@@ -31,6 +36,7 @@ import java.util.ArrayList;
  */
 
 public class MainActivity extends Activity {
+    private final static int PERMISSION_REQUEST_AUDIOREC = 1;
     private EditText mRoomNameEditText;
     private Button mStartChatButton;
     private Button mStartStreamButton;
@@ -71,6 +77,7 @@ public class MainActivity extends Activity {
                     mExplainWindow.show(v);
             }
         });
+        startAudioRecordWithPermCheck();
     }
 
     @Override
@@ -94,7 +101,7 @@ public class MainActivity extends Activity {
             AudioStreamUilts.joinRoom(mRoomName, Utils.getDeviceID(getApplicationContext()), new DefaultHttpResponseListener() {
                 @Override
                 public void onSuccess(MeLiveInfo info) {
-                    if(!MainActivity.this.isFinishing()) {
+                    if (!MainActivity.this.isFinishing()) {
                         AudioStreamActivity.startActivity(MainActivity.this, mRoomName, Utils.getDeviceID(MainActivity.this), info);
                         LoadingDialog.dismissLoadingDialog(MainActivity.this);
                     }
@@ -122,7 +129,7 @@ public class MainActivity extends Activity {
             AudioChatUilts.joinRoom(mRoomName, Utils.getDeviceID(getApplicationContext()), new DefaultHttpResponseListener() {
                 @Override
                 public void onSuccess(MeLiveInfo info) {
-                    if(!MainActivity.this.isFinishing()) {
+                    if (!MainActivity.this.isFinishing()) {
                         AudioChatActivity.startActivity(MainActivity.this, mRoomName, Utils.getDeviceID(MainActivity.this), (ArrayList<ChatInfo>) info.getFansInfos());
                         LoadingDialog.dismissLoadingDialog(MainActivity.this);
                     }
@@ -146,5 +153,31 @@ public class MainActivity extends Activity {
                 Toast.makeText(MainActivity.this, str, Toast.LENGTH_SHORT).show();
             }
         });
+    }
+
+    private void startAudioRecordWithPermCheck() {
+        int audioPerm = ActivityCompat.checkSelfPermission(MainActivity.this, Manifest.permission.RECORD_AUDIO);
+        if (audioPerm != PackageManager.PERMISSION_GRANTED) {
+            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
+                Toast.makeText(this, "No AudioRecord permission, please check", Toast.LENGTH_LONG).show();
+            } else {
+                String[] permissions = {Manifest.permission.RECORD_AUDIO, Manifest.permission.READ_EXTERNAL_STORAGE};
+                ActivityCompat.requestPermissions(this, permissions, PERMISSION_REQUEST_AUDIOREC);
+            }
+        }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String permissions[], @NonNull int[] grantResults) {
+        switch (requestCode) {
+            case PERMISSION_REQUEST_AUDIOREC: {
+                // If request is cancelled, the result arrays are empty.
+                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                } else {
+                    Toast.makeText(this, "No AudioRecord permission", Toast.LENGTH_LONG).show();
+                }
+                break;
+            }
+        }
     }
 }
