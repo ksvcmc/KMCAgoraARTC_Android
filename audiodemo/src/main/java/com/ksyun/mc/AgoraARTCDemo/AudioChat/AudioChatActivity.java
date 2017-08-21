@@ -37,18 +37,18 @@ import java.util.List;
 
 public class AudioChatActivity extends Activity {
     private final static String TAG = AudioChatActivity.class.getSimpleName();
-    private final static String CHAT_ID_LIST = "ChatIdList";
+    private final static String CHAT_ID_LIST = "CHAT_ID_LIST";
     private final static String ROOM_NAME = "ROOM_NAME";
-    private final static String USER_ID = "userID";
+    private final static String USER_ID = "USER_ID";
 
 
     private ArrayList<ChatInfo> mChatIdList;
-    private AudioLinkListView linkListView;
-    private String roomName;
-    private String userID;
-    private ImageView chatClose;
-    private ImageView close;
-    private TextView title;
+    private AudioLinkListView mLinkListView;
+    private String mRootName;
+    private String mUserID;
+    private ImageView mChatCloseImageView;
+    private ImageView mCloseImageView;
+    private TextView mTitleTextView;
     private Handler mHandler;
 
     private boolean isRun;
@@ -72,30 +72,30 @@ public class AudioChatActivity extends Activity {
         Intent intent = getIntent();
         mChatIdList = intent.getParcelableArrayListExtra(CHAT_ID_LIST);
         if (mChatIdList == null) mChatIdList = new ArrayList<ChatInfo>();
-        roomName = intent.getStringExtra(ROOM_NAME);
-        userID = intent.getStringExtra(USER_ID);
-        linkListView = (AudioLinkListView) findViewById(R.id.audio_user_list);
-        chatClose = (ImageView) findViewById(R.id.imgv_chat_close);
-        title = (TextView) findViewById(R.id.tv_chat_title);
-        close = (ImageView) findViewById(R.id.imgv_close);
+        mRootName = intent.getStringExtra(ROOM_NAME);
+        mUserID = intent.getStringExtra(USER_ID);
+        mLinkListView = (AudioLinkListView) findViewById(R.id.audio_user_list);
+        mChatCloseImageView = (ImageView) findViewById(R.id.imgv_chat_close);
+        mTitleTextView = (TextView) findViewById(R.id.tv_chat_title);
+        mCloseImageView = (ImageView) findViewById(R.id.imgv_close);
 
         mHandler = new Handler();
-        String name = String.format(getResources().getString(R.string.audio_chat_title), roomName);
-        title.setText(name);
+        String name = String.format(getResources().getString(R.string.audio_chat_title), mRootName);
+        mTitleTextView.setText(name);
 
         if (mChatIdList != null && mChatIdList.size() > 0) {
             for (ChatInfo info : mChatIdList) {
-                linkListView.addImageUrl(info.getHeadUrl(), R.mipmap.default_image);
+                mLinkListView.addImageUrl(info.getHeadUrl(), R.mipmap.default_image);
             }
         }
-        chatClose.setOnClickListener(new NoDoubleClickListener() {
+        mChatCloseImageView.setOnClickListener(new NoDoubleClickListener() {
             @Override
             public void onNoDoubleClick(View v) {
 //                hangupChat();
                 finish();
             }
         });
-        close.setOnClickListener(new NoDoubleClickListener() {
+        mCloseImageView.setOnClickListener(new NoDoubleClickListener() {
             @Override
             public void onNoDoubleClick(View v) {
 //                hangupChat();
@@ -109,7 +109,7 @@ public class AudioChatActivity extends Activity {
             public void onSuccess() {
                 if (mRTCWrapper != null) {
                     isRun = true;
-                    mRTCWrapper.joinChannel(roomName, 0);
+                    mRTCWrapper.joinChannel(mRootName, 0);
                     mRTCWrapper.enableObserver(false);
                 }
             }
@@ -171,7 +171,7 @@ public class AudioChatActivity extends Activity {
             mRTCWrapper.leaveChannel();
             mRTCWrapper.release();
             mRTCWrapper = null;
-            AudioChatUilts.leaveRoom(roomName, userID, new HttpRequest.HttpResponseListener() {
+            AudioChatUilts.leaveRoom(mRootName, mUserID, new HttpRequest.HttpResponseListener() {
                 @Override
                 public void onHttpResponse(int responseCode, String response) {
                     if (responseCode != HttpURLConnection.HTTP_OK) {
@@ -186,7 +186,7 @@ public class AudioChatActivity extends Activity {
      * 查询连麦列表
      */
     private void fetchChatList() {
-        AudioChatUilts.fetchChatList(roomName, new DefaultHttpResponseListener() {
+        AudioChatUilts.fetchChatList(mRootName, new DefaultHttpResponseListener() {
             @Override
             public void onSuccess(MeLiveInfo info) {
                 if(!AudioChatActivity.this.isFinishing()) {
@@ -222,13 +222,13 @@ public class AudioChatActivity extends Activity {
                 List<ChatInfo> tempList = new ArrayList<ChatInfo>(mChatIdList);
                 for (ChatInfo info : tempList) {
                     if (!newInfos.contains(info)) {
-                        linkListView.removeImageUrl(info.getHeadUrl());
+                        mLinkListView.removeImageUrl(info.getHeadUrl());
                         mChatIdList.remove(info);
                     }
                 }
                 for (ChatInfo info : newInfos) {
                     if (!mChatIdList.contains(info)) {
-                        linkListView.addImageUrl(info.getHeadUrl(), R.mipmap.default_image);
+                        mLinkListView.addImageUrl(info.getHeadUrl(), R.mipmap.default_image);
                         mChatIdList.add(info);
                     }
                 }

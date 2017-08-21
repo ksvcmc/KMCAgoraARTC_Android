@@ -15,7 +15,6 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
-import com.ksyun.mc.AgoraARTCDemo.AudioChat.AudioChatActivity;
 import com.ksyun.mc.AgoraARTCDemo.R;
 import com.ksyun.mc.AgoraARTCDemo.info.ChatInfo;
 import com.ksyun.mc.AgoraARTCDemo.info.MeLiveInfo;
@@ -42,19 +41,19 @@ import java.util.TimeZone;
 public class AudioStreamActivity extends Activity {
     private final static String TAG = AudioStreamActivity.class.getName();
     private final static String INTENT_EXTRA = MeLiveInfo.class.getName();
-    private final static String ROOM_NAME = "roomName";
-    private final static String USER_ID = "userID";
+    private final static String ROOM_NAME = "ROOM_NAME";
+    private final static String USER_ID = "USER_ID";
 
-    private MeLiveInfo info;
-    private ImageView userImage;
-    private ImageView callImage;
-    private TextView userName;
-    private SimpleDateFormat timeFormat;
-    private TextView timeView;
-    private LinearLayout fansLayout;
-    private String roomName;
-    private String userID;
-    private boolean isChat;
+    private MeLiveInfo mLiveInfo;
+    private ImageView mUserImageView;
+    private ImageView mCallImageView;
+    private TextView mUserNameView;
+    private SimpleDateFormat mTimeDateFormat;
+    private TextView mTimeTextView;
+    private LinearLayout mChatLayoutView;
+    private String mRoomName;
+    private String mUserID;
+    private boolean mIsChat;
     private Handler mHandler;
     private long mTimeMs;
 
@@ -76,22 +75,22 @@ public class AudioStreamActivity extends Activity {
         super.onCreate(savedInstanceState);
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON, WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         setContentView(R.layout.audio_stream_activity);
-        info = getIntent().getParcelableExtra(INTENT_EXTRA);
-        roomName = getIntent().getStringExtra(ROOM_NAME);
-        userID = getIntent().getStringExtra(USER_ID);
-        isChat = (info.getUserType() == 1);
-        mTimeMs = info.getCreateTime();
-        timeFormat = new SimpleDateFormat("HH:mm:ss");
-        timeFormat.setTimeZone(TimeZone.getTimeZone("GMT+0"));
-        if (info == null) {
+        mLiveInfo = getIntent().getParcelableExtra(INTENT_EXTRA);
+        mRoomName = getIntent().getStringExtra(ROOM_NAME);
+        mUserID = getIntent().getStringExtra(USER_ID);
+        mIsChat = (mLiveInfo.getUserType() == 1);
+        mTimeMs = mLiveInfo.getCreateTime();
+        mTimeDateFormat = new SimpleDateFormat("HH:mm:ss");
+        mTimeDateFormat.setTimeZone(TimeZone.getTimeZone("GMT+0"));
+        if (mLiveInfo == null) {
             makeToast("参数传递错误");
-            info = new MeLiveInfo();
+            mLiveInfo = new MeLiveInfo();
         }
-        userImage = (ImageView) findViewById(R.id.imgv_userName);
-        timeView = (TextView) findViewById(R.id.tv_time);
-        userName = (TextView) findViewById(R.id.tv_userName);
-        fansLayout = (LinearLayout) findViewById(R.id.ll_fans);
-        callImage = (ImageView) findViewById(R.id.imgv_call);
+        mUserImageView = (ImageView) findViewById(R.id.imgv_userName);
+        mTimeTextView = (TextView) findViewById(R.id.tv_time);
+        mUserNameView = (TextView) findViewById(R.id.tv_userName);
+        mChatLayoutView = (LinearLayout) findViewById(R.id.ll_fans);
+        mCallImageView = (ImageView) findViewById(R.id.imgv_call);
         mHandler = new Handler();
 
         findViewById(R.id.imgv_close).setOnClickListener(new View.OnClickListener() {
@@ -100,34 +99,34 @@ public class AudioStreamActivity extends Activity {
                 finish();
             }
         });
-        callImage.setOnClickListener(new NoDoubleClickListener() {
+        mCallImageView.setOnClickListener(new NoDoubleClickListener() {
             @Override
             public void onNoDoubleClick(View v) {
-                if (isChat) {
-                    isChat = false;
+                if (mIsChat) {
+                    mIsChat = false;
                     unJoinChat();
-                    callImage.setImageResource(R.mipmap.audio_connect);
+                    mCallImageView.setImageResource(R.mipmap.audio_connect);
                 } else {
                     joinChat();
                 }
             }
         });
 
-        mStreamer = KMCStreamerManager.createKMCStream(info.getUserType() == 1);
-        mStreamer.initStream(roomName, this, onStateListener);
+        mStreamer = KMCStreamerManager.createKMCStream(mLiveInfo.getUserType() == 1);
+        mStreamer.initStream(mRoomName, this, onStateListener);
         LoadingDialog.showLoadingDialog(this);
-        userName.setText(info.getAnchorNickname());
-        setTime(info.getCreateTime());
-        if (isChat) {
-            callImage.setImageResource(R.mipmap.audio_disconnect);
+        mUserNameView.setText(mLiveInfo.getAnchorNickname());
+        setTime(mLiveInfo.getCreateTime());
+        if (mIsChat) {
+            mCallImageView.setImageResource(R.mipmap.audio_disconnect);
         } else {
-            callImage.setImageResource(R.mipmap.audio_connect);
+            mCallImageView.setImageResource(R.mipmap.audio_connect);
         }
-        if (info.getUserType() == 1) {
-            callImage.setVisibility(View.INVISIBLE);
+        if (mLiveInfo.getUserType() == 1) {
+            mCallImageView.setVisibility(View.INVISIBLE);
         }
-        Glide.with(this).load(info.getAnchorHeadUrl()).dontAnimate().transform(new GlideCircleTransform(this)).error(R.mipmap.user_image).placeholder(R.mipmap.user_image).into(userImage);
-        updateListUser(info.getFansInfos());
+        Glide.with(this).load(mLiveInfo.getAnchorHeadUrl()).dontAnimate().transform(new GlideCircleTransform(this)).error(R.mipmap.user_image).placeholder(R.mipmap.user_image).into(mUserImageView);
+        updateListUser(mLiveInfo.getFansInfos());
         mHandler.postDelayed(new RunGetChatList(this), Constant.DELAYED_TIME);
     }
 
@@ -159,7 +158,7 @@ public class AudioStreamActivity extends Activity {
      * 退出房间
      */
     private void leaveRoom() {
-        AudioStreamUilts.leaveRoom(roomName, userID, new HttpRequest.HttpResponseListener() {
+        AudioStreamUilts.leaveRoom(mRoomName, mUserID, new HttpRequest.HttpResponseListener() {
             @Override
             public void onHttpResponse(int responseCode, String response) {
                 if (responseCode != HttpURLConnection.HTTP_OK) {
@@ -176,7 +175,7 @@ public class AudioStreamActivity extends Activity {
      */
     private void getChatList() {
 
-        AudioStreamUilts.getChatList(roomName, new DefaultHttpResponseListener() {
+        AudioStreamUilts.getChatList(mRoomName, new DefaultHttpResponseListener() {
             @Override
             public void onSuccess(MeLiveInfo info) {
                 if(AudioStreamActivity.this.isFinishing()) return;
@@ -212,7 +211,7 @@ public class AudioStreamActivity extends Activity {
      */
     private void kickUser(String uid) {
         LoadingDialog.showLoadingDialog(AudioStreamActivity.this);
-        AudioStreamUilts.anchorKick(roomName, uid, userID, new DefaultHttpResponseListener() {
+        AudioStreamUilts.anchorKick(mRoomName, uid, mUserID, new DefaultHttpResponseListener() {
             @Override
             public void onSuccess(MeLiveInfo info) {
                 if(AudioStreamActivity.this.isFinishing()) return;
@@ -239,7 +238,7 @@ public class AudioStreamActivity extends Activity {
         LoadingDialog.showLoadingDialog(AudioStreamActivity.this);
         Log.d(TAG,"unJoinChat,StopRTC");
         mStreamer.stopRTC();
-        AudioStreamUilts.unJoinChat(roomName, userID, new DefaultHttpResponseListener() {
+        AudioStreamUilts.unJoinChat(mRoomName, mUserID, new DefaultHttpResponseListener() {
             @Override
             public void onSuccess(MeLiveInfo info) {
                 if(AudioStreamActivity.this.isFinishing()) return;
@@ -264,7 +263,7 @@ public class AudioStreamActivity extends Activity {
      */
     private void joinChat() {
         LoadingDialog.showLoadingDialog(AudioStreamActivity.this);
-        mStreamer.startRTC(roomName);
+        mStreamer.startRTC(mRoomName);
     }
 
     private void updateListUser(List<ChatInfo> chatInfos) {
@@ -278,7 +277,7 @@ public class AudioStreamActivity extends Activity {
      */
     private void updateUI(List<ChatInfo> chatInfos) {
         if (chatInfos != null) {
-            fansLayout.removeAllViews();
+            mChatLayoutView.removeAllViews();
             int count = (chatInfos.size() > 3) ? 3 : chatInfos.size();
             boolean isFansConnect = false;
             for (int i = 0; i < count; i++) {
@@ -286,17 +285,17 @@ public class AudioStreamActivity extends Activity {
                 View view = View.inflate(this, R.layout.audio_stream_user_list_item, null);
                 view.setTag(in.getUserId());
 
-                if (userID.equals(in.getUserId())) {
+                if (mUserID.equals(in.getUserId())) {
                     isFansConnect = true;
                 }
                 ImageView status = (ImageView) view.findViewById(R.id.imgv_fans_status);
                 ImageView fans = (ImageView) view.findViewById(R.id.imgv_fans);
 
                 Glide.with(this).load(in.getHeadUrl()).placeholder(R.mipmap.user_image).error(R.mipmap.user_image).dontAnimate().transform(new GlideCircleTransform(this)).into(fans);
-                if (info.getUserType() == 0 && Utils.getDeviceID(getApplicationContext()).equals(in.getUserId())) {
+                if (mLiveInfo.getUserType() == 0 && Utils.getDeviceID(getApplicationContext()).equals(in.getUserId())) {
                     status.setImageResource(R.mipmap.audio_voip_disconnect);
                     view.setOnClickListener(listener);
-                } else if (info.getUserType() == 1) { //主播模式
+                } else if (mLiveInfo.getUserType() == 1) { //主播模式
                     status.setImageResource(R.mipmap.audio_voip_disconnect);
                     view.setOnClickListener(listener);
                 } else {
@@ -304,14 +303,14 @@ public class AudioStreamActivity extends Activity {
                 }
                 LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, 0);
                 params.weight = 1;
-                fansLayout.addView(view, params);
+                mChatLayoutView.addView(view, params);
             }
-            if (!isFansConnect && (info.getUserType() == 0)) {
+            if (!isFansConnect && (mLiveInfo.getUserType() == 0)) {
                 if (mStreamer != null && !mStreamer.isPlayering() && mStreamer.isRCT() && isRemote) {
                     Log.d(TAG,"updateUI,StopRTC");
                     mStreamer.stopRTC();
-                    isChat = false;
-                    callImage.setImageResource(R.mipmap.audio_connect);
+                    mIsChat = false;
+                    mCallImageView.setImageResource(R.mipmap.audio_connect);
                 }
             }
         }
@@ -320,12 +319,12 @@ public class AudioStreamActivity extends Activity {
     private NoDoubleClickListener listener = new NoDoubleClickListener() {
         @Override
         public void onNoDoubleClick(View v) {
-            if (info.getUserType() == 1) { //主播
+            if (mLiveInfo.getUserType() == 1) { //主播
                 kickUser((String) v.getTag());
-            } else if (userID.equals(v.getTag())) { //当前粉丝
-                isChat = false;
+            } else if (mUserID.equals(v.getTag())) { //当前粉丝
+                mIsChat = false;
                 unJoinChat();
-                callImage.setImageResource(R.mipmap.audio_connect);
+                mCallImageView.setImageResource(R.mipmap.audio_connect);
             }
         }
     };
@@ -350,7 +349,7 @@ public class AudioStreamActivity extends Activity {
         public void onRTCSuccess() {
             Log.i(TAG, "onRTCSuccess");
             isRemote = false;
-            AudioStreamUilts.joinChat(roomName, userID, new DefaultHttpResponseListener() {
+            AudioStreamUilts.joinChat(mRoomName, mUserID, new DefaultHttpResponseListener() {
                 @Override
                 public void onSuccess(MeLiveInfo info) {
                     LoadingDialog.dismissLoadingDialog(AudioStreamActivity.this);
@@ -359,8 +358,8 @@ public class AudioStreamActivity extends Activity {
                             mHandler.post(new Runnable() {
                                 @Override
                                 public void run() {
-                                    isChat = true;
-                                    callImage.setImageResource(R.mipmap.audio_disconnect);
+                                    mIsChat = true;
+                                    mCallImageView.setImageResource(R.mipmap.audio_disconnect);
                                 }
                             });
                         }
@@ -408,8 +407,8 @@ public class AudioStreamActivity extends Activity {
 
     private void setTime(long ms) {
         String data = getResources().getString(R.string.audio_stream_time);
-        data = String.format(data, timeFormat.format(ms));
-        timeView.setText(data);
+        data = String.format(data, mTimeDateFormat.format(ms));
+        mTimeTextView.setText(data);
     }
 
     static class UpdateUIRunnable implements Runnable {
