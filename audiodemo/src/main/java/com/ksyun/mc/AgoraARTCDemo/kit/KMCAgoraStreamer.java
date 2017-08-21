@@ -163,6 +163,11 @@ public class KMCAgoraStreamer extends KSYStreamer {
                     case KMCAgoraEventListener.JOIN_CHANNEL_RESULT: {
                         boolean success = (Boolean) data[0];
                         mRTCClient.startReceiveRemoteData();
+                        setAudioMode(mHeadSetPlugged ? AudioManager.MODE_IN_COMMUNICATION :
+                                AudioManager.MODE_NORMAL);
+                        mIsRemoteConnected = true;
+                        updateRTCConnect(mRTCMainScreen);
+                        Log.d(TAG, "onFirstRemoteVideoDecoded " + Arrays.toString(data));
                         break;
                     }
 
