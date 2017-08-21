@@ -12,24 +12,28 @@ import android.widget.RelativeLayout;
 
 import com.bumptech.glide.Glide;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 
 /**
- * Created by xiaoqiang on 2017/8/13.
+ * 自定义布局：
+ * 实现聊天室动态添加头像的功能
+ * 最多允许8人进入聊天室
  */
 
 public class AudioLinkListView extends RelativeLayout {
 
-    private int oViewLeftMargin = 20;
-    private int tViewLineHeight = oViewLeftMargin;
-    private int moViewMargin = 20;
-    private int moViewLHeight = moViewMargin + 15;
-    private int moViewLWidth = moViewMargin + 15;
-    private Map<Object,View> views = new HashMap<Object,View>();
+    private final int CHILD_VIEW_ONE_LARGE_ICON = 1; // 只有一人时显示大图
+    private final int CHILD_VIEW_TWO_LARGE_ICON = 2; // 只有两人时竖向显示大图
+    private final int CHILD_VIEW_TWO_LINES_ICONS = 3; // 三人和四人聊天时显示双排小头像
+    private final int CHILD_VIEW_THREE_LINES_ICONS = 5; // 五人和六人聊天时显示三排小头像
+    private final int CHILD_VIEW_FOUR_LINES_ICONS = 7; //七人和8人聊天时显示四排小头像
+    private int mOneViewLeftMargin = 20; //1人时左边Margin
+    private int mTwoViewLineHeight = mOneViewLeftMargin; // 2人时定义行间距
+    private int mMoreViewLeftMargin = 20; //2人以上时左边Margin 默认值
+    private int mMoreViewLHeight = mMoreViewLeftMargin + 15;//2人以上时行间距默认值
+    private int mMoreViewLWidth = mMoreViewLeftMargin + 15; //2人以上时列间距默认值
+    private Map<Object, View> mViews = new HashMap<Object, View>();
 
     public AudioLinkListView(@NonNull Context context) {
         this(context, null);
@@ -48,31 +52,20 @@ public class AudioLinkListView extends RelativeLayout {
 
     }
 
-    public void addView(View view) {
-
-    }
-
+    /**
+     * 动态添加图片
+     * @param url 加载需要的图片地址
+     * @param defaultResourceID  默认显示的资源ID
+     */
     public void addImageUrl(String url, int defaultResourceID) {
         ImageView imageView = new ImageView(getContext());
         imageView.setBackgroundColor(0x00000000);
         LayoutParams params = new LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
-        views.put(url,imageView);
+        mViews.put(url, imageView);
         this.addView(imageView, params);
         Glide.with(getContext()).load(url).placeholder(defaultResourceID).error(defaultResourceID).dontAnimate().into(imageView);
     }
 
-    /**
-     * 更新界面
-     * @param oldUrl
-     * @param newUrl
-     * @param defaultResourceID
-     */
-    public void updateImageUrl(String oldUrl,String newUrl, int defaultResourceID){
-        View view =  views.get(oldUrl);
-        if(view != null && view instanceof ImageView){
-            Glide.with(getContext()).load(newUrl).placeholder(defaultResourceID).error(defaultResourceID).dontAnimate().into((ImageView) view);
-        }
-    }
 
     public void addImageResource(int resourceID) {
         ImageView imageView = new ImageView(getContext());
@@ -85,13 +78,18 @@ public class AudioLinkListView extends RelativeLayout {
 
     public void removeImageResource(int resourceID) {
         View view = findViewWithTag(resourceID);
-        if(view != null){
+        if (view != null) {
             removeView(view);
         }
     }
-    public void removeImageUrl(String url){
-        View view = views.get(url);
-        if(view != null){
+
+    /**
+     * 根据URL删除图片
+     * @param url
+     */
+    public void removeImageUrl(String url) {
+        View view = mViews.get(url);
+        if (view != null) {
             removeView(view);
         }
     }
@@ -103,30 +101,30 @@ public class AudioLinkListView extends RelativeLayout {
         if (child <= 0) {
             super.onLayout(changed, left, top, right, bottom);
         } else {
-            int moViewLeftMargin = moViewMargin;
-            int moViewLineHeight = moViewLHeight;
-            int moViewLineWidth = moViewLWidth;
+            int moViewLeftMargin = mMoreViewLeftMargin;
+            int moViewLineHeight = mMoreViewLHeight;
+            int moViewLineWidth = mMoreViewLWidth;
             switch (child) {
-                case 1:
+                case CHILD_VIEW_ONE_LARGE_ICON:
                     updateOneView();
                     return;
-                case 2:
+                case CHILD_VIEW_TWO_LARGE_ICON:
                     updateTwoView();
                     return;
-                case 3:
-                case 4:
+                case CHILD_VIEW_TWO_LINES_ICONS:
+                case CHILD_VIEW_TWO_LINES_ICONS + 1:
                     moViewLeftMargin = moViewLeftMargin + 5;
                     moViewLineHeight = moViewLineHeight + 10;
                     moViewLineWidth = moViewLineWidth - 5;
                     break;
-                case 5:
-                case 6:
+                case CHILD_VIEW_THREE_LINES_ICONS:
+                case CHILD_VIEW_THREE_LINES_ICONS + 1:
                     moViewLeftMargin = moViewLeftMargin + 6;
                     moViewLineHeight = -1;
                     moViewLineWidth = moViewLineWidth - 15;
                     break;
-                case 7:
-                case 8:
+                case CHILD_VIEW_FOUR_LINES_ICONS:
+                case CHILD_VIEW_FOUR_LINES_ICONS + 1:
                     moViewLeftMargin = moViewLeftMargin + 20;
                     moViewLineHeight = -1;
                     moViewLineWidth = moViewLineWidth - 15;
@@ -138,23 +136,35 @@ public class AudioLinkListView extends RelativeLayout {
         }
     }
 
+    /**
+     * 1人时更新界面
+     */
     private void updateOneView() {
         int width = getMeasuredWidth();
         int height = getMeasuredHeight();
-        int childW = width - dpToPx(oViewLeftMargin * 2);
+        int childW = width - dpToPx(mOneViewLeftMargin * 2);
         int left = (int) ((width - childW) / 2.0);
         int top = (int) ((height - childW) / 2.0);
         getChildAt(0).layout(left, top, childW + left, childW + top);
     }
 
+    /**
+     * 2人时更新界面
+     */
     private void updateTwoView() {
         int width = getMeasuredWidth();
-        int childW = (getMeasuredHeight() - dpToPx(tViewLineHeight)) / 2;
+        int childW = (getMeasuredHeight() - dpToPx(mTwoViewLineHeight)) / 2;
         int left = (int) ((width - childW) / 2.0);
         getChildAt(0).layout(left, 0, childW + left, childW);
-        getChildAt(1).layout(left, childW + dpToPx(tViewLineHeight), childW + left, 2 * childW + dpToPx(tViewLineHeight));
+        getChildAt(1).layout(left, childW + dpToPx(mTwoViewLineHeight), childW + left, 2 * childW + dpToPx(mTwoViewLineHeight));
     }
 
+    /**
+     * 2人以上时更新界面
+     * @param moViewLeftMargin
+     * @param moViewLineHeight  行间距为-1时，表示需要把图片铺满
+     * @param moViewLineWidth
+     */
     private void updateMoreView(int moViewLeftMargin, int moViewLineHeight, int moViewLineWidth) {
         moViewLeftMargin = dpToPx(moViewLeftMargin);
         if (moViewLineHeight > 0) moViewLineHeight = dpToPx(moViewLineHeight);

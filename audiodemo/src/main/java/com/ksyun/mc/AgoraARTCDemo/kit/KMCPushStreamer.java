@@ -22,8 +22,8 @@ public class KMCPushStreamer implements KMCStreamer {
 
     private KMCAgoraStreamer mStreamer;
     private Handler mHandler;
-    private OnStateListener listener;
-    private String roomName;
+    private OnStateListener mStateListener;
+    private String mRoomName;
 
     KMCPushStreamer() {
     }
@@ -31,9 +31,9 @@ public class KMCPushStreamer implements KMCStreamer {
     @Override
     public void initStream(String roomName, Context context, final OnStateListener listener) {
         mStreamer = new KMCAgoraStreamer(context);
-        this.listener = listener;
+        this.mStateListener = listener;
         mHandler = new Handler(Looper.getMainLooper());
-        this.roomName = roomName;
+        this.mRoomName = roomName;
         mStreamer.setAudioOnly(true);
         mStreamer.setUrl(Constant.PUSH_STREAM_URL + roomName);
         mStreamer.setOnInfoListener(infoListener);
@@ -77,8 +77,8 @@ public class KMCPushStreamer implements KMCStreamer {
         if (mStreamer != null) {
             Log.i(TAG, "startRTC,Channel:"+tempChannel);
             mStreamer.startRTC(tempChannel);
-            listener.onSuccess();
-            listener.onRTCSuccess();
+            mStateListener.onSuccess();
+            mStateListener.onRTCSuccess();
             mStreamer.setAudioMode(AudioManager.MODE_NORMAL);
         }
     }
@@ -88,7 +88,7 @@ public class KMCPushStreamer implements KMCStreamer {
         if (mStreamer != null) {
             Log.i(TAG, "stopRTC");
             mStreamer.stopRTC();
-            listener.onRTCFailed("结束连麦");
+            mStateListener.onRTCFailed("结束连麦");
         }
     }
 
@@ -121,7 +121,7 @@ public class KMCPushStreamer implements KMCStreamer {
             switch (what) {
                 case StreamerConstants.KSY_STREAMER_OPEN_STREAM_SUCCESS:
                     Log.i(TAG, "KSY_STREAMER_OPEN_STREAM_SUCCESS");
-                    startRTC(roomName);
+                    startRTC(mRoomName);
                     break;
 
             }
@@ -145,12 +145,12 @@ public class KMCPushStreamer implements KMCStreamer {
                 case StreamerConstants.KSY_STREAMER_ERROR_DNS_PARSE_FAILED:
                 case StreamerConstants.KSY_STREAMER_ERROR_CONNECT_BREAKED:
                     if (reference.get() != null) {
-                        reference.get().listener.onFailed("推流失败,错误：" + what);
+                        reference.get().mStateListener.onFailed("推流失败,错误：" + what);
                     }
                     break;
                 default:
                     if (reference.get() != null) {
-                        reference.get().listener.onFailed("推流失败，错误：" + what+"，正在重试");
+                        reference.get().mStateListener.onFailed("推流失败，错误：" + what+"，正在重试");
                     }
                     if (reference.get() != null && reference.get().mStreamer != null && !reference.get().mStreamer.getEnableAutoRestart()) {
                         reference.get().mStreamer.stopStream();

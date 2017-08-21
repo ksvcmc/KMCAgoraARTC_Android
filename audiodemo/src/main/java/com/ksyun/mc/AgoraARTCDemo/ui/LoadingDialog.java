@@ -3,9 +3,6 @@ package com.ksyun.mc.AgoraARTCDemo.ui;
 import android.app.Activity;
 import android.app.Dialog;
 import android.content.Context;
-import android.util.Log;
-import android.view.Gravity;
-import android.view.ViewGroup;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.Toast;
@@ -19,15 +16,15 @@ import java.util.Calendar;
  */
 
 public class LoadingDialog extends Dialog {
-    private static LoadingDialog mDialog;
-    private long lastClickTime;
-    private int back = 0;
-    private int backNum;
+    private static LoadingDialog mLoadingDialog;
+    private long mLastClickTime;
+    private int mBack = 0;
+    private int mBackNum;
 
     private LoadingDialog(Context context, int theme,int backNum) {
         super(context, theme);
         initView();
-        this.backNum = backNum;
+        this.mBackNum = backNum;
     }
     private void initView(){
         RelativeLayout relativeLayout = new RelativeLayout(getContext());
@@ -40,9 +37,9 @@ public class LoadingDialog extends Dialog {
 
     }
     public static synchronized void showLoadingDialog(Context mContext,int backPressedNum){
-        if(mDialog == null){
-            mDialog = new LoadingDialog(mContext,R.style.loading_dialog,backPressedNum);
-            mDialog.show();
+        if(mLoadingDialog == null){
+            mLoadingDialog = new LoadingDialog(mContext,R.style.loading_dialog,backPressedNum);
+            mLoadingDialog.show();
         }
     }
 
@@ -53,27 +50,27 @@ public class LoadingDialog extends Dialog {
     @Override
     public void onBackPressed() {
         long currentTime = Calendar.getInstance().getTimeInMillis();
-        if (currentTime - lastClickTime < 2000 && isShowing()) {
-            back++;
+        if (currentTime - mLastClickTime < 2000 && isShowing()) {
+            mBack++;
         } else {
             Toast.makeText(getContext(),"在按一次退出",Toast.LENGTH_SHORT).show();
-            lastClickTime = currentTime;
-            back = 1;
+            mLastClickTime = currentTime;
+            mBack = 1;
         }
-        if(back >= backNum){
+        if(mBack >= mBackNum){
             super.onBackPressed();
             if(getContext() instanceof Activity){
                 ((Activity)getContext()).finish();
             }
-            mDialog = null;
+            mLoadingDialog = null;
         }
     }
 
     public static synchronized void dismissLoadingDialog(Context mContext){
-        if(mDialog != null && mDialog.isShowing()){
-            mDialog.dismiss();
+        if(mLoadingDialog != null && mLoadingDialog.isShowing()){
+            mLoadingDialog.dismiss();
         }
-        mDialog = null;
+        mLoadingDialog = null;
     }
 
 }

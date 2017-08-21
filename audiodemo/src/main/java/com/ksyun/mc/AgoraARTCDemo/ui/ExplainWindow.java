@@ -8,7 +8,6 @@ import android.util.AttributeSet;
 import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.PopupWindow;
 import android.widget.RelativeLayout;
@@ -22,7 +21,7 @@ import com.ksyun.mc.AgoraARTCDemo.R;
 
 public class ExplainWindow extends RelativeLayout {
 
-    private PopupWindow popupWindow;
+    private PopupWindow mPopupWindow;
 
     public ExplainWindow(Context context) {
         this(context,null);
@@ -73,21 +72,21 @@ public class ExplainWindow extends RelativeLayout {
     public void show(View view) {
         int width = getDisplayWidth() - dpToPx(40);
         int height = (int) (width * 10f / 7);
-        popupWindow = new PopupWindow(this, width, height);
-        popupWindow.setBackgroundDrawable(new ColorDrawable(Color.parseColor("#00F8F8F8")));
-        popupWindow.setContentView(this);
-        popupWindow.update();
-        popupWindow.showAtLocation(view.getRootView(), Gravity.CENTER, 0, 0);
+        mPopupWindow = new PopupWindow(this, width, height);
+        mPopupWindow.setBackgroundDrawable(new ColorDrawable(Color.parseColor("#00F8F8F8")));
+        mPopupWindow.setContentView(this);
+        mPopupWindow.update();
+        mPopupWindow.showAtLocation(view.getRootView(), Gravity.CENTER, 0, 0);
     }
     public boolean isShow(){
-        return (popupWindow == null)?false:popupWindow.isShowing();
+        return (mPopupWindow == null)?false: mPopupWindow.isShowing();
     }
 
     public void dismiss(){
-        if(popupWindow != null && popupWindow.isShowing()){
-            popupWindow.dismiss();
+        if(mPopupWindow != null && mPopupWindow.isShowing()){
+            mPopupWindow.dismiss();
         }
-        popupWindow = null;
+        mPopupWindow = null;
     }
     int getDisplayWidth() {
         return ((Activity) getContext()).getWindowManager().getDefaultDisplay().getWidth();
