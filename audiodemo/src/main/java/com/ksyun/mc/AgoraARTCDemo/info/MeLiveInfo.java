@@ -17,6 +17,7 @@ public class MeLiveInfo implements Parcelable {
     private int userType;
     private long createTime;
     private int isClose;
+    private String  streamId;
     private List<ChatInfo> fansInfos;
 
     public MeLiveInfo(){
@@ -31,6 +32,7 @@ public class MeLiveInfo implements Parcelable {
         createTime = in.readLong();
         fansInfos = in.createTypedArrayList(ChatInfo.CREATOR);
         isClose = in.readInt();
+        streamId = in.readString();
     }
 
     @Override
@@ -42,6 +44,7 @@ public class MeLiveInfo implements Parcelable {
         dest.writeLong(createTime);
         dest.writeTypedList(fansInfos);
         dest.writeInt(isClose);
+        dest.writeString(streamId);
     }
 
     @Override
@@ -115,5 +118,13 @@ public class MeLiveInfo implements Parcelable {
 
     public void setIsClose(int isClose) {
         this.isClose = isClose;
+    }
+
+    public String getStreamId() {
+        return streamId;
+    }
+
+    public void setStreamId(String streamId) {
+        this.streamId = streamId;
     }
 }

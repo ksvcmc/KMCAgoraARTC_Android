@@ -11,6 +11,7 @@ import org.json.JSONObject;
 
 import java.net.HttpURLConnection;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -20,10 +21,13 @@ import java.util.List;
 public abstract class DefaultHttpResponseListener implements HttpRequest.HttpResponseListener {
 
     private static final String TAG = DefaultHttpResponseListener.class.getName();
+    public static final int ROOM_FULL = 404; //房间已满
+    public static final int ROOM_NAME_ERROR = 400; //房间名称错误或者不存在
+    public static final int NETWORK_ERROR = -2; //网络请求错误
 
     public abstract void onSuccess(MeLiveInfo info);
 
-    public abstract void onFaile(int errorCode, String message);
+    public abstract void onFailed(int errorCode, String message);
 
     @Override
     public void onHttpResponse(int responseCode, String response) {
@@ -49,25 +53,26 @@ public abstract class DefaultHttpResponseListener implements HttpRequest.HttpRes
                 info.setUserType(obj.optInt("userType", 0));
                 info.setCreateTime(obj.optLong("createTime", 0));
                 info.setIsClose(obj.optInt("isClose",0));
+                info.setStreamId(obj.optString("streamId",String.valueOf(new Date().getTime())));
                 onSuccess(info);
 
             } catch (JSONException ex) {
                 Log.e(TAG, "onHttpResponse: " + ex.getLocalizedMessage());
-                onFaile(-1, "error:" + ex.getMessage());
+                onFailed(-1, "error:" + ex.getMessage());
             }
         } else {
             if (responseCode > HttpURLConnection.HTTP_INTERNAL_ERROR) {
-                onFaile(responseCode, "网络错误");
+                onFailed(NETWORK_ERROR, "网络错误");
             } else {
                 JSONObject error;
                 try {
                     error = new JSONObject(response).getJSONObject("Error");
                     if (error != null) {
                         String message = error.getString("Message");
-                        onFaile(responseCode, message);
+                        onFailed(responseCode, message);
                     }
                 } catch (JSONException e) {
-                    onFaile(responseCode, "网络错误");
+                    onFailed(-1, "error:" + e.getMessage());
                 }
             }
         }

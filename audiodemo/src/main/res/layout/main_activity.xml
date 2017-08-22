@@ -26,7 +26,6 @@
         android:layout_marginTop="40dp"
         android:background="#1e2438"
         android:inputType="text"
-        android:digits="0123456789abcdefghigklmnopqrstuvwxyzABCDEFGHIGKLMNOPQRSTUVWXYZ._-*"
         android:gravity="center"
         android:hint="#多人输入相同标题即可进行语音连麦#"
         android:imeOptions="actionDone"

@@ -1,7 +1,9 @@
 package com.ksyun.mc.AgoraARTCDemo.AudioStream;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
@@ -31,6 +33,7 @@ import com.ksyun.mc.AgoraARTCDemo.utils.Utils;
 import java.lang.ref.WeakReference;
 import java.net.HttpURLConnection;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.TimeZone;
 
@@ -113,8 +116,7 @@ public class AudioStreamActivity extends Activity {
         });
 
         mStreamer = KMCStreamerManager.createKMCStream(mLiveInfo.getUserType() == 1);
-        mStreamer.initStream(mRoomName, this, onStateListener);
-        LoadingDialog.showLoadingDialog(this);
+        mStreamer.initStream(mLiveInfo.getStreamId(), this, onStateListener);
         mUserNameView.setText(mLiveInfo.getAnchorNickname());
         setTime(mLiveInfo.getCreateTime());
         if (mIsChat) {
@@ -124,6 +126,9 @@ public class AudioStreamActivity extends Activity {
         }
         if (mLiveInfo.getUserType() == 1) {
             mCallImageView.setVisibility(View.INVISIBLE);
+        }
+        if (mHandler != null ) {
+            mHandler.postDelayed(new RunTime(AudioStreamActivity.this), 1000);
         }
         Glide.with(this).load(mLiveInfo.getAnchorHeadUrl()).dontAnimate().transform(new GlideCircleTransform(this)).error(R.mipmap.user_image).placeholder(R.mipmap.user_image).into(mUserImageView);
         updateListUser(mLiveInfo.getFansInfos());
@@ -196,7 +201,7 @@ public class AudioStreamActivity extends Activity {
             }
 
             @Override
-            public void onFaile(int errorCode, String message) {
+            public void onFailed(int errorCode, String message) {
                 Log.e(TAG, "getChatList  faile:" + errorCode + ",response:" + message);
                 if(AudioStreamActivity.this.isFinishing()) return;
                 if (mHandler != null) {
@@ -215,7 +220,7 @@ public class AudioStreamActivity extends Activity {
             @Override
             public void onSuccess(MeLiveInfo info) {
                 if(AudioStreamActivity.this.isFinishing()) return;
-                LoadingDialog.dismissLoadingDialog(AudioStreamActivity.this);
+                LoadingDialog.dismissLoadingDialog();
                 if (info.getIsClose() != 0) {
                     Log.e(TAG, "踢出用户失败，房间已经被关闭");
                 }
@@ -223,9 +228,9 @@ public class AudioStreamActivity extends Activity {
             }
 
             @Override
-            public void onFaile(int errorCode, String error) {
+            public void onFailed(int errorCode, String error) {
                 if(AudioStreamActivity.this.isFinishing()) return;
-                LoadingDialog.dismissLoadingDialog(AudioStreamActivity.this);
+                LoadingDialog.dismissLoadingDialog();
                 makeToast("踢出用户失败," + error);
             }
         });
@@ -242,7 +247,7 @@ public class AudioStreamActivity extends Activity {
             @Override
             public void onSuccess(MeLiveInfo info) {
                 if(AudioStreamActivity.this.isFinishing()) return;
-                LoadingDialog.dismissLoadingDialog(AudioStreamActivity.this);
+                LoadingDialog.dismissLoadingDialog();
                 if (info.getIsClose() != 0) {
                     Log.e(TAG, "退出连麦，房间已经被关闭");
                 }
@@ -250,9 +255,9 @@ public class AudioStreamActivity extends Activity {
             }
 
             @Override
-            public void onFaile(int errorCode, String error) {
+            public void onFailed(int errorCode, String error) {
                 if(AudioStreamActivity.this.isFinishing()) return;
-                LoadingDialog.dismissLoadingDialog(AudioStreamActivity.this);
+                LoadingDialog.dismissLoadingDialog();
 //                makeToast("退出连麦失败," + error);
             }
         });
@@ -263,7 +268,40 @@ public class AudioStreamActivity extends Activity {
      */
     private void joinChat() {
         LoadingDialog.showLoadingDialog(AudioStreamActivity.this);
-        mStreamer.startRTC(mRoomName);
+        isRemote = false;
+        AudioStreamUilts.joinChat(mRoomName, mUserID, new DefaultHttpResponseListener() {
+            @Override
+            public void onSuccess(MeLiveInfo info) {
+                if(isFinishing()) return;
+                if (info.getIsClose() == 0) {
+                    mStreamer.startRTC(mLiveInfo.getStreamId());
+                    if(mHandler != null){
+                        mHandler.post(new Runnable() {
+                            @Override
+                            public void run() {
+                                mIsChat = true;
+                                mCallImageView.setImageResource(R.mipmap.audio_disconnect);
+                            }
+                        });
+                    }
+                    updateListUser(info.getFansInfos());
+                } else {
+                    LoadingDialog.dismissLoadingDialog();
+                    makeToast("加入连麦失败，房间已经被关闭");
+                }
+            }
+
+            @Override
+            public void onFailed(int errorCode, String error) {
+                if(isFinishing()) return;
+                LoadingDialog.dismissLoadingDialog();
+                if(errorCode == DefaultHttpResponseListener.ROOM_FULL){
+                    showErrorDialog(R.string.room_full);
+                }else
+                    makeToast("加入连麦失败," + error);
+            }
+        });
+
     }
 
     private void updateListUser(List<ChatInfo> chatInfos) {
@@ -330,69 +368,47 @@ public class AudioStreamActivity extends Activity {
     };
     private KMCStreamer.OnStateListener onStateListener = new KMCStreamer.OnStateListener() {
         @Override
+        public void onStreamStart() {
+            LoadingDialog.showLoadingDialog(AudioStreamActivity.this);
+        }
+
+        @Override
         public void onSuccess() {
             Log.i(TAG, "ONSuccess");
-            LoadingDialog.dismissLoadingDialog(AudioStreamActivity.this);
-            if (mHandler != null) {
-                mHandler.postDelayed(new RunTime(AudioStreamActivity.this), 1000);
-            }
+            LoadingDialog.dismissLoadingDialog();
+
         }
 
         @Override
         public void onFailed(String msg) {
             Log.i(TAG, "onFailed,msg:" + msg);
-            LoadingDialog.dismissLoadingDialog(AudioStreamActivity.this);
+            LoadingDialog.dismissLoadingDialog();
             makeToast(msg);
         }
 
         @Override
         public void onRTCSuccess() {
+            isRemote = true;
             Log.i(TAG, "onRTCSuccess");
-            isRemote = false;
-            AudioStreamUilts.joinChat(mRoomName, mUserID, new DefaultHttpResponseListener() {
-                @Override
-                public void onSuccess(MeLiveInfo info) {
-                    LoadingDialog.dismissLoadingDialog(AudioStreamActivity.this);
-                    if (info.getIsClose() == 0) {
-                        if(mHandler != null){
-                            mHandler.post(new Runnable() {
-                                @Override
-                                public void run() {
-                                    mIsChat = true;
-                                    mCallImageView.setImageResource(R.mipmap.audio_disconnect);
-                                }
-                            });
-                        }
-                        isRemote = true;
-                        updateListUser(info.getFansInfos());
-                    } else {
-                        makeToast("加入连麦失败，房间已经被关闭");
-                        if(mStreamer != null){
-                            Log.d(TAG,"onRTCSuccess,onSuccess,StopRTC");
-                            mStreamer.stopRTC();
-                        }
-                        isRemote = false;
-                    }
-                }
-
-                @Override
-                public void onFaile(int errorCode, String error) {
-                    LoadingDialog.dismissLoadingDialog(AudioStreamActivity.this);
-                    makeToast("加入连麦失败," + error);
-                    isRemote = false;
-                    if(mStreamer != null){
-                        Log.d(TAG,"onRTCSuccess,onFaile,StopRTC");
-                        mStreamer.stopRTC();
-                    }
-                }
-            });
+            LoadingDialog.dismissLoadingDialog();
         }
 
         @Override
         public void onRTCFailed(String msg) {
             Log.i(TAG, "onRTCFailed,msg:" + msg);
-            LoadingDialog.dismissLoadingDialog(AudioStreamActivity.this);
+            isRemote = false;
+            LoadingDialog.dismissLoadingDialog();
             makeToast(msg);
+            if(mHandler != null){
+                mHandler.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        mIsChat = false;
+                        mCallImageView.setImageResource(R.mipmap.audio_connect);
+                    }
+                });
+            }
+            updateListUser(new ArrayList<ChatInfo>());
         }
     };
 
@@ -459,5 +475,20 @@ public class AudioStreamActivity extends Activity {
                     reference.get().mHandler.postDelayed(this, 1000);
             }
         }
+    }
+    private void showErrorDialog(final int msgId) {
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                if(isFinishing()) return;
+                new AlertDialog.Builder(AudioStreamActivity.this).setMessage(msgId).setPositiveButton("好的", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.dismiss();
+                    }
+                }).create().show();
+
+            }
+        });
     }
 }
