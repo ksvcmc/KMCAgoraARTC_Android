@@ -112,7 +112,7 @@ public class MainActivity extends Activity {
                 }
 
                 @Override
-                public void onFaile(int errorCode, String error) {
+                public void onFailed(int errorCode, String error) {
                     LoadingDialog.dismissLoadingDialog();
                     joinFaile(errorCode);
                 }
@@ -140,7 +140,7 @@ public class MainActivity extends Activity {
                 }
 
                 @Override
-                public void onFaile(int errorCode, String error) {
+                public void onFailed(int errorCode, String error) {
                     LoadingDialog.dismissLoadingDialog();
                     joinFaile(errorCode);
                 }

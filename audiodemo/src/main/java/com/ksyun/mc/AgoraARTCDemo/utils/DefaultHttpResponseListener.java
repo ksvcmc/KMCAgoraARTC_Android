@@ -27,7 +27,7 @@ public abstract class DefaultHttpResponseListener implements HttpRequest.HttpRes
 
     public abstract void onSuccess(MeLiveInfo info);
 
-    public abstract void onFaile(int errorCode, String message);
+    public abstract void onFailed(int errorCode, String message);
 
     @Override
     public void onHttpResponse(int responseCode, String response) {
@@ -58,21 +58,21 @@ public abstract class DefaultHttpResponseListener implements HttpRequest.HttpRes
 
             } catch (JSONException ex) {
                 Log.e(TAG, "onHttpResponse: " + ex.getLocalizedMessage());
-                onFaile(-1, "error:" + ex.getMessage());
+                onFailed(-1, "error:" + ex.getMessage());
             }
         } else {
             if (responseCode > HttpURLConnection.HTTP_INTERNAL_ERROR) {
-                onFaile(NETWORK_ERROR, "网络错误");
+                onFailed(NETWORK_ERROR, "网络错误");
             } else {
                 JSONObject error;
                 try {
                     error = new JSONObject(response).getJSONObject("Error");
                     if (error != null) {
                         String message = error.getString("Message");
-                        onFaile(responseCode, message);
+                        onFailed(responseCode, message);
                     }
                 } catch (JSONException e) {
-                    onFaile(-1, "error:" + e.getMessage());
+                    onFailed(-1, "error:" + e.getMessage());
                 }
             }
         }

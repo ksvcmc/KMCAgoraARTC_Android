@@ -201,7 +201,7 @@ public class AudioChatActivity extends Activity {
             }
 
             @Override
-            public void onFaile(int errorCode, String error) {
+            public void onFailed(int errorCode, String error) {
                 if(!AudioChatActivity.this.isFinishing()) {
                     Log.e(TAG, "查询连麦用户列表失败，错误吗：" + errorCode + ",错误原因:" + error);
                     if (mHandler != null) {

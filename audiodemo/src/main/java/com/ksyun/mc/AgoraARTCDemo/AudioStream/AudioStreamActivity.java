@@ -201,7 +201,7 @@ public class AudioStreamActivity extends Activity {
             }
 
             @Override
-            public void onFaile(int errorCode, String message) {
+            public void onFailed(int errorCode, String message) {
                 Log.e(TAG, "getChatList  faile:" + errorCode + ",response:" + message);
                 if(AudioStreamActivity.this.isFinishing()) return;
                 if (mHandler != null) {
@@ -228,7 +228,7 @@ public class AudioStreamActivity extends Activity {
             }
 
             @Override
-            public void onFaile(int errorCode, String error) {
+            public void onFailed(int errorCode, String error) {
                 if(AudioStreamActivity.this.isFinishing()) return;
                 LoadingDialog.dismissLoadingDialog();
                 makeToast("踢出用户失败," + error);
@@ -255,7 +255,7 @@ public class AudioStreamActivity extends Activity {
             }
 
             @Override
-            public void onFaile(int errorCode, String error) {
+            public void onFailed(int errorCode, String error) {
                 if(AudioStreamActivity.this.isFinishing()) return;
                 LoadingDialog.dismissLoadingDialog();
 //                makeToast("退出连麦失败," + error);
@@ -292,7 +292,7 @@ public class AudioStreamActivity extends Activity {
             }
 
             @Override
-            public void onFaile(int errorCode, String error) {
+            public void onFailed(int errorCode, String error) {
                 if(isFinishing()) return;
                 LoadingDialog.dismissLoadingDialog();
                 if(errorCode == DefaultHttpResponseListener.ROOM_FULL){
