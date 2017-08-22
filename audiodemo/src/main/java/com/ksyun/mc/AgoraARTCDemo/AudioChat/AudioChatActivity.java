@@ -51,7 +51,7 @@ public class AudioChatActivity extends Activity {
     private TextView mTitleTextView;
     private Handler mHandler;
 
-    private boolean isRun;
+    private boolean mIsRTCRun;
     private KMCAgoraVRTC mRTCWrapper;
 
     public static void startActivity(Context mContext, String roorName, String userID, ArrayList<ChatInfo> chatInfos) {
@@ -107,8 +107,7 @@ public class AudioChatActivity extends Activity {
         mRTCWrapper.authorize(Constant.TOKEN, false, new KMCAuthResultListener() {
             @Override
             public void onSuccess() {
-                if (mRTCWrapper != null) {
-                    isRun = true;
+                if (mRTCWrapper != null && !isFinishing()) {
                     mRTCWrapper.joinChannel(mRootName, 0);
                     mRTCWrapper.enableObserver(false);
                 }
@@ -116,7 +115,7 @@ public class AudioChatActivity extends Activity {
 
             @Override
             public void onFailure(int errCode) {
-                makeToast("鉴权失败，错误码：" + errCode);
+                makeToast("鉴权失败: 错误码" + errCode);
             }
         });
         mRTCWrapper.registerEventListener(listener);
@@ -137,6 +136,7 @@ public class AudioChatActivity extends Activity {
         public void onEvent(int event, Object... data) {
             switch (event) {
                 case JOIN_CHANNEL_RESULT:
+                    mIsRTCRun = true;
                     Log.d(TAG, "EVENT：JOIN_CHANNEL_RESULT");
                     AudioManager audioManager = (AudioManager) AudioChatActivity.this.getSystemService(Context.AUDIO_SERVICE);
                     if (!audioManager.isSpeakerphoneOn()) {
@@ -149,9 +149,11 @@ public class AudioChatActivity extends Activity {
                     fetchChatList();
                     break;
                 case ERROR:
-                    makeToast("连麦失败，错误码：" + data[0]);
+                    mIsRTCRun = false;
+                    makeToast("连麦错误，错误码：" + data[0]);
                     break;
                 case LEAVE_CHANNEL:
+                    mIsRTCRun = false;
                     break;
                 case USER_OFFLINE:
                     Log.d(TAG, "EVENT：USER_OFFLINE");
@@ -165,10 +167,11 @@ public class AudioChatActivity extends Activity {
      * 挂断通话
      */
     private void hangupChat() {
-        if (mRTCWrapper != null && isRun) {
-            isRun = false;
+        if (mRTCWrapper != null ) {
 //            mRTCWrapper.enableObserver(false);
-            mRTCWrapper.leaveChannel();
+            if(mIsRTCRun) { //用户成功加入频道后才可以离开频道
+                mRTCWrapper.leaveChannel();
+            }
             mRTCWrapper.release();
             mRTCWrapper = null;
             AudioChatUilts.leaveRoom(mRootName, mUserID, new HttpRequest.HttpResponseListener() {

@@ -4,6 +4,7 @@ import android.content.Context;
 import android.media.AudioManager;
 import android.os.Handler;
 import android.os.Looper;
+import android.support.annotation.NonNull;
 import android.util.Log;
 
 import com.ksyun.mc.AgoraARTCDemo.utils.Constant;
@@ -29,7 +30,7 @@ public class KMCPushStreamer implements KMCStreamer {
     }
 
     @Override
-    public void initStream(String roomName, Context context, final OnStateListener listener) {
+    public void initStream(@NonNull String roomName, @NonNull Context context,@NonNull final OnStateListener listener) {
         mStreamer = new KMCAgoraStreamer(context);
         this.mStateListener = listener;
         mHandler = new Handler(Looper.getMainLooper());
@@ -43,6 +44,7 @@ public class KMCPushStreamer implements KMCStreamer {
         mStreamer.setAudioSampleRate(44100);
         mStreamer.setAudioKBitrate(48);
         mStreamer.setEnableAudioPreview(false);
+        mStateListener.onStreamStart();
         mStreamer.authorize(Constant.TOKEN, new KMCAuthResultListener() {
             @Override
             public void onSuccess() {
@@ -55,7 +57,7 @@ public class KMCPushStreamer implements KMCStreamer {
             @Override
             public void onFailure(int errCode) {
                 Log.e(TAG, "鉴权失败，onFailure:"+errCode);
-                listener.onFailed("鉴权失败！  错误码: " + errCode);
+                listener.onFailed("鉴权失败: 错误码" + errCode);
             }
         });
     }
@@ -88,7 +90,7 @@ public class KMCPushStreamer implements KMCStreamer {
         if (mStreamer != null) {
             Log.i(TAG, "stopRTC");
             mStreamer.stopRTC();
-            mStateListener.onRTCFailed("结束连麦");
+//            mStateListener.onRTCFailed("结束连麦");
         }
     }
 

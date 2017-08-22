@@ -39,7 +39,11 @@ public class LoadingDialog extends Dialog {
     public static synchronized void showLoadingDialog(Context mContext,int backPressedNum){
         if(mLoadingDialog == null){
             mLoadingDialog = new LoadingDialog(mContext,R.style.loading_dialog,backPressedNum);
-            mLoadingDialog.show();
+            try {
+                mLoadingDialog.show();
+            }catch (Exception e){
+                e.printStackTrace();
+            }
         }
     }
 
@@ -66,9 +70,13 @@ public class LoadingDialog extends Dialog {
         }
     }
 
-    public static synchronized void dismissLoadingDialog(Context mContext){
+    public static synchronized void dismissLoadingDialog(){
         if(mLoadingDialog != null && mLoadingDialog.isShowing()){
-            mLoadingDialog.dismiss();
+            try {
+                mLoadingDialog.dismiss();
+            }catch (Exception e){
+                e.printStackTrace();
+            }
         }
         mLoadingDialog = null;
     }

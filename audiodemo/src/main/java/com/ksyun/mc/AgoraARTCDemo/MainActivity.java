@@ -2,13 +2,16 @@ package com.ksyun.mc.AgoraARTCDemo;
 
 import android.Manifest;
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
+import android.util.Log;
 import android.view.View;
 import android.view.WindowManager;
 import android.view.inputmethod.InputMethodManager;
@@ -37,6 +40,7 @@ import java.util.ArrayList;
 
 public class MainActivity extends Activity {
     private final static int PERMISSION_REQUEST_AUDIOREC = 1;
+    private static final String TAG = MainActivity.class.getName();
     private EditText mRoomNameEditText;
     private Button mStartChatButton;
     private Button mStartStreamButton;
@@ -95,7 +99,7 @@ public class MainActivity extends Activity {
         inputManager.hideSoftInputFromWindow(getCurrentFocus().getWindowToken(),
                 InputMethodManager.HIDE_NOT_ALWAYS);
 
-        mRoomName = mRoomNameEditText.getText().toString();
+        mRoomName = mRoomNameEditText.getText().toString().trim();
         if (mRoomName != null && mRoomName.length() > 0 && mRoomName.length() < 32) {
             LoadingDialog.showLoadingDialog(this);
             AudioStreamUilts.joinRoom(mRoomName, Utils.getDeviceID(getApplicationContext()), new DefaultHttpResponseListener() {
@@ -103,18 +107,18 @@ public class MainActivity extends Activity {
                 public void onSuccess(MeLiveInfo info) {
                     if (!MainActivity.this.isFinishing()) {
                         AudioStreamActivity.startActivity(MainActivity.this, mRoomName, Utils.getDeviceID(MainActivity.this), info);
-                        LoadingDialog.dismissLoadingDialog(MainActivity.this);
+                        LoadingDialog.dismissLoadingDialog();
                     }
                 }
 
                 @Override
                 public void onFaile(int errorCode, String error) {
-                    LoadingDialog.dismissLoadingDialog(MainActivity.this);
-                    makeToast("创建直播流失败：" + error);
+                    LoadingDialog.dismissLoadingDialog();
+                    joinFaile(errorCode);
                 }
             });
         } else {
-            makeToast("标题名称必须在0～32个字符以内");
+            showErrorDialog(R.string.main_title_no_null);
         }
     }
 
@@ -123,7 +127,7 @@ public class MainActivity extends Activity {
                 (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
         inputManager.hideSoftInputFromWindow(getCurrentFocus().getWindowToken(),
                 InputMethodManager.HIDE_NOT_ALWAYS);
-        mRoomName = mRoomNameEditText.getText().toString();
+        mRoomName = mRoomNameEditText.getText().toString().trim();
         if (mRoomName != null && mRoomName.length() > 0 && mRoomName.length() < 32) {
             LoadingDialog.showLoadingDialog(MainActivity.this);
             AudioChatUilts.joinRoom(mRoomName, Utils.getDeviceID(getApplicationContext()), new DefaultHttpResponseListener() {
@@ -131,18 +135,18 @@ public class MainActivity extends Activity {
                 public void onSuccess(MeLiveInfo info) {
                     if (!MainActivity.this.isFinishing()) {
                         AudioChatActivity.startActivity(MainActivity.this, mRoomName, Utils.getDeviceID(MainActivity.this), (ArrayList<ChatInfo>) info.getFansInfos());
-                        LoadingDialog.dismissLoadingDialog(MainActivity.this);
+                        LoadingDialog.dismissLoadingDialog();
                     }
                 }
 
                 @Override
                 public void onFaile(int errorCode, String error) {
-                    LoadingDialog.dismissLoadingDialog(MainActivity.this);
-                    makeToast("创建聊天室失败：" + error);
+                    LoadingDialog.dismissLoadingDialog();
+                    joinFaile(errorCode);
                 }
             });
         } else {
-            makeToast("标题名称必须在0～32个字符以内");
+            showErrorDialog(R.string.main_title_no_null);
         }
     }
 
@@ -179,5 +183,39 @@ public class MainActivity extends Activity {
                 break;
             }
         }
+    }
+
+    private void joinFaile(int errorCode) {
+        switch (errorCode) {
+            case DefaultHttpResponseListener.NETWORK_ERROR:
+                showErrorDialog(R.string.network_faile);
+                break;
+            case DefaultHttpResponseListener.ROOM_FULL:
+                showErrorDialog(R.string.room_full);
+                break;
+            case DefaultHttpResponseListener.ROOM_NAME_ERROR:
+                showErrorDialog(R.string.main_title_no_null);
+                break;
+            default:
+                showErrorDialog(R.string.network_faile);
+                Log.e(TAG, "其他错误导致无法音频连麦：" + errorCode);
+                break;
+        }
+    }
+
+
+    private void showErrorDialog(final int msgId) {
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                new AlertDialog.Builder(MainActivity.this).setMessage(msgId).setPositiveButton("好的", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.dismiss();
+                    }
+                }).create().show();
+
+            }
+        });
     }
 }

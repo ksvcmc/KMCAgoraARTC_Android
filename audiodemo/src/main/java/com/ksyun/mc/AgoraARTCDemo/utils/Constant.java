@@ -8,7 +8,8 @@ public class Constant {
     //状态刷新时间
     public final static long DELAYED_TIME = 3000;
     //服务器地址
-    public final static String SERVER_URL = "http://voicecalldemo.api.ks-live.com";
+//    public final static String SERVER_URL = "http://voicecalldemo.api.ks-live.com";
+    public final static String SERVER_URL = "http://voicecalldemo.api.seancloud.cn";
     //TOKEN
     public final static String TOKEN = "648e6ec7f957aabde391ebba7f43c1fa";
 

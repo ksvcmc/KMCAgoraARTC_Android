@@ -2,6 +2,9 @@ package com.ksyun.mc.AgoraARTCDemo.kit;
 
 import android.content.Context;
 import android.media.AudioManager;
+import android.os.Handler;
+import android.os.Looper;
+import android.support.annotation.NonNull;
 import android.util.Log;
 
 import com.ksyun.mc.AgoraARTCDemo.utils.Constant;
@@ -20,45 +23,52 @@ import java.io.IOException;
 public class KMCPlayerStreamer implements KMCStreamer {
     private KSYMediaPlayer mMediaPlayer;
     private KMCAgoraVRTC mRTCWrapper;
-    private Context mContext;
     private String mRoomName;
     private OnStateListener mStateListener;
     private boolean mIsRemoteConnected;
+    private Handler mHandler;
+    private Context mContext;
 
     KMCPlayerStreamer(){}
     @Override
-    public void initStream(String roomName, Context context, OnStateListener listener) {
-        this.mContext = context;
+    public void initStream(@NonNull String roomName,@NonNull Context context,@NonNull OnStateListener listener) {
         this.mRoomName = roomName;
         this.mStateListener = listener;
-        mMediaPlayer = new KSYMediaPlayer.Builder(context.getApplicationContext()).build();
-        mMediaPlayer.setOnCompletionListener(mOnCompletionListener);
-        mMediaPlayer.setOnPreparedListener(mOnPreparedListener);
-        mMediaPlayer.setOnInfoListener(mOnInfoListener);
-        mMediaPlayer.setOnErrorListener(mOnErrorListener);
+        mHandler = new Handler(Looper.myLooper());
+        this.mContext = context.getApplicationContext();
+//        mMediaPlayer = new KSYMediaPlayer.Builder(context.getApplicationContext()).build();
+//        mMediaPlayer.setOnCompletionListener(mOnCompletionListener);
+//        mMediaPlayer.setOnPreparedListener(mOnPreparedListener);
+//        mMediaPlayer.setOnInfoListener(mOnInfoListener);
+//        mMediaPlayer.setOnErrorListener(mOnErrorListener);
+//        mMediaPlayer.shouldAutoPlay(false);
+        mStateListener.onStreamStart();
         startPlayer();
     }
 
     @Override
     public void destroyStream() {
+        mHandler.removeCallbacksAndMessages(null);
+        mHandler = null;
         if (mRTCWrapper != null) {
             mRTCWrapper.leaveChannel();
             mRTCWrapper.release();
         }
         mRTCWrapper = null;
-        if(mMediaPlayer.isPlaying()){
-            stopPlayer();
-        }
-        if(mMediaPlayer != null)
-            mMediaPlayer.release();
-        mMediaPlayer = null;
+        stopPlayer();
+//        if(mMediaPlayer.isPlaying()){
+//            stopPlayer();
+//        }
+//        if(mMediaPlayer != null)
+//            mMediaPlayer.release();
+//        mMediaPlayer = null;
     }
 
     @Override
     public void startRTC(final String tempChannel) {
-        if(mMediaPlayer.isPlaying()){
+//        if(mMediaPlayer.isPlaying()){
             stopPlayer();
-        }
+//        }
         mRTCWrapper = new KMCAgoraVRTC(mContext);
         mRTCWrapper.authorize(Constant.TOKEN, false, new KMCAuthResultListener() {
             @Override
@@ -89,7 +99,15 @@ public class KMCPlayerStreamer implements KMCStreamer {
             mRTCWrapper.release();
             mRTCWrapper = null;
         }
-        startPlayer();
+        Log.d(TAG,"停止连麦");
+//        startPlayer();
+        mStateListener.onStreamStart();
+        mHandler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                startPlayer();
+            }
+        },1000);
     }
 
     @Override
@@ -112,10 +130,23 @@ public class KMCPlayerStreamer implements KMCStreamer {
     }
 
     private void stopPlayer(){
-        if(mMediaPlayer != null)
-            mMediaPlayer.stop();
+        if(mMediaPlayer != null) {
+            if (mMediaPlayer.isPlaying()) {
+                Log.d(TAG,"停止播放");
+                mMediaPlayer.stop();
+            }
+            Log.d(TAG,"销毁播放器");
+            mMediaPlayer.release();
+        }
+        mMediaPlayer = null;
     }
     private  void startPlayer(){
+        mMediaPlayer = new KSYMediaPlayer.Builder(mContext).build();
+        mMediaPlayer.setOnCompletionListener(mOnCompletionListener);
+        mMediaPlayer.setOnPreparedListener(mOnPreparedListener);
+        mMediaPlayer.setOnInfoListener(mOnInfoListener);
+        mMediaPlayer.setOnErrorListener(mOnErrorListener);
+        mMediaPlayer.shouldAutoPlay(false);
         if(mMediaPlayer != null && !mMediaPlayer.isPlaying()) {
             try {
                 Log.d(TAG,"准备开始播放");
@@ -127,7 +158,6 @@ public class KMCPlayerStreamer implements KMCStreamer {
         }
 
     }
-
     private IMediaPlayer.OnCompletionListener mOnCompletionListener = new IMediaPlayer.OnCompletionListener() {
         @Override
         public void onCompletion(IMediaPlayer mp) {
@@ -141,7 +171,7 @@ public class KMCPlayerStreamer implements KMCStreamer {
     private IMediaPlayer.OnPreparedListener mOnPreparedListener = new IMediaPlayer.OnPreparedListener() {
         @Override
         public void onPrepared(IMediaPlayer mp) {
-            if(mMediaPlayer != null) {
+            if(mMediaPlayer != null && !mMediaPlayer.isPlaying()) {
 //                // 设置视频伸缩模式，此模式为裁剪模式
 //                mMediaPlayer.setVideoScalingMode(KSYMediaPlayer.VIDEO_SCALING_MODE_SCALE_TO_FIT_WITH_CROPPING);
                 // 开始播放视频
@@ -163,6 +193,7 @@ public class KMCPlayerStreamer implements KMCStreamer {
     private IMediaPlayer.OnErrorListener mOnErrorListener = new IMediaPlayer.OnErrorListener() {
         @Override
         public boolean onError(IMediaPlayer iMediaPlayer, int i, int i1) {
+            Log.e(TAG,"播放出错了,error:"+i);
             mStateListener.onFailed("播放出错了,error:"+i);
             return false;
         }
