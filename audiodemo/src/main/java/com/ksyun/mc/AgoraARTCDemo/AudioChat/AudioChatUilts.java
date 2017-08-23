@@ -7,6 +7,9 @@ import com.ksyun.mc.AgoraARTCDemo.utils.HttpRequest;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+
 /**
  * Created by sujia on 2017/8/10.
  */
@@ -66,7 +69,11 @@ public class AudioChatUilts {
             StringBuilder uri = new StringBuilder(Constant.SERVER_URL);
             uri.append("/api/multi/getChatList");
             uri.append("?roomName=");
-            uri.append(roomName);
+            try {
+                uri.append(URLEncoder.encode(roomName,"UTF-8"));
+            } catch (UnsupportedEncodingException e) {
+                e.printStackTrace();
+            }
             httpRequest.execute(uri.toString());
         }
     }

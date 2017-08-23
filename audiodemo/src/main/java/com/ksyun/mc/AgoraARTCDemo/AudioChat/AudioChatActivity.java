@@ -40,12 +40,14 @@ public class AudioChatActivity extends Activity {
     private final static String CHAT_ID_LIST = "CHAT_ID_LIST";
     private final static String ROOM_NAME = "ROOM_NAME";
     private final static String USER_ID = "USER_ID";
+    private final static String CHANNEL_NAME ="CHANNEL_NAME";
 
 
     private ArrayList<ChatInfo> mChatIdList;
     private AudioLinkListView mLinkListView;
     private String mRootName;
     private String mUserID;
+    private String mChannelName;
     private ImageView mChatCloseImageView;
     private ImageView mCloseImageView;
     private TextView mTitleTextView;
@@ -54,11 +56,12 @@ public class AudioChatActivity extends Activity {
     private boolean mIsRTCRun;
     private KMCAgoraVRTC mRTCWrapper;
 
-    public static void startActivity(Context mContext, String roorName, String userID, ArrayList<ChatInfo> chatInfos) {
+    public static void startActivity(Context mContext, String roorName, String userID,String channelName, ArrayList<ChatInfo> chatInfos) {
         Intent intent = new Intent(mContext, AudioChatActivity.class);
         intent.putParcelableArrayListExtra(AudioChatActivity.CHAT_ID_LIST, chatInfos);
         intent.putExtra(ROOM_NAME, roorName);
         intent.putExtra(USER_ID, userID);
+        intent.putExtra(CHANNEL_NAME,channelName);
         mContext.startActivity(intent);
 
     }
@@ -74,6 +77,7 @@ public class AudioChatActivity extends Activity {
         if (mChatIdList == null) mChatIdList = new ArrayList<ChatInfo>();
         mRootName = intent.getStringExtra(ROOM_NAME);
         mUserID = intent.getStringExtra(USER_ID);
+        mChannelName = intent.getStringExtra(CHANNEL_NAME);
         mLinkListView = (AudioLinkListView) findViewById(R.id.audio_user_list);
         mChatCloseImageView = (ImageView) findViewById(R.id.imgv_chat_close);
         mTitleTextView = (TextView) findViewById(R.id.tv_chat_title);
@@ -108,7 +112,7 @@ public class AudioChatActivity extends Activity {
             @Override
             public void onSuccess() {
                 if (mRTCWrapper != null && !isFinishing()) {
-                    mRTCWrapper.joinChannel(mRootName, 0);
+                    mRTCWrapper.joinChannel(mChannelName, 0);
                     mRTCWrapper.enableObserver(false);
                 }
             }

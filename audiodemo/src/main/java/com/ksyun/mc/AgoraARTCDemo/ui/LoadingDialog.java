@@ -36,8 +36,8 @@ public class LoadingDialog extends Dialog {
         setContentView(relativeLayout);
 
     }
-    public static synchronized void showLoadingDialog(Context mContext,int backPressedNum){
-        if(mLoadingDialog == null){
+    public static synchronized void showLoadingDialog(Activity mContext,int backPressedNum){
+        if(mLoadingDialog == null && !mContext.isFinishing()){
             mLoadingDialog = new LoadingDialog(mContext,R.style.loading_dialog,backPressedNum);
             try {
                 mLoadingDialog.show();
@@ -47,7 +47,7 @@ public class LoadingDialog extends Dialog {
         }
     }
 
-    public static synchronized void showLoadingDialog(Context mContext){
+    public static synchronized void showLoadingDialog(Activity mContext){
         showLoadingDialog(mContext,2);
     }
 

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">魔方语音连麦</string>
+    <string name="app_name">语音连麦</string>
     <string name="audio_stream_time">正在直播  %s</string>
     <string name="audio_chat_title">房间名： %s</string>
     <string name="main_title_no_null">请输入标题</string>
