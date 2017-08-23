@@ -11,6 +11,8 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.View;
 import android.view.WindowManager;
@@ -56,6 +58,7 @@ public class MainActivity extends Activity {
 
         mRoomNameEditText = (EditText) findViewById(R.id.audio_chat_channel_name);
         mRoomNameEditText.requestFocus();
+        mRoomNameEditText.addTextChangedListener(mWatcher);
         mStartChatButton = (Button) findViewById(R.id.audio_chat_start_button);
         mStartStreamButton = (Button) findViewById(R.id.audio_stream_start_button);
         mBtnExplain = (TextView) findViewById(R.id.btn_explain);
@@ -82,6 +85,12 @@ public class MainActivity extends Activity {
             }
         });
         startAudioRecordWithPermCheck();
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        LoadingDialog.dismissLoadingDialog();
     }
 
     @Override
@@ -134,7 +143,8 @@ public class MainActivity extends Activity {
                 @Override
                 public void onSuccess(MeLiveInfo info) {
                     if (!MainActivity.this.isFinishing()) {
-                        AudioChatActivity.startActivity(MainActivity.this, mRoomName, Utils.getDeviceID(MainActivity.this), (ArrayList<ChatInfo>) info.getFansInfos());
+                        String channelName = (info.getStreamId() == null) ? mRoomName : info.getStreamId();
+                        AudioChatActivity.startActivity(MainActivity.this, mRoomName, Utils.getDeviceID(MainActivity.this), channelName, (ArrayList<ChatInfo>) info.getFansInfos());
                         LoadingDialog.dismissLoadingDialog();
                     }
                 }
@@ -217,5 +227,40 @@ public class MainActivity extends Activity {
 
             }
         });
+    }
+
+    private TextWatcher mWatcher = new TextWatcher() {
+        @Override
+        public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+        }
+
+        @Override
+        public void onTextChanged(CharSequence s, int start, int before, int count) {
+
+        }
+
+        @Override
+        public void afterTextChanged(Editable editable) {
+            int index = mRoomNameEditText.getSelectionStart() - 1;
+            if (index >= 0 && isEmojiCharacter(editable.charAt(index))) {
+                Editable edit = mRoomNameEditText.getText();
+                edit.delete(index, index + 1);
+            }
+        }
+    };
+
+    /**
+     * 判断是否是表情
+     * @param codePoint
+     * @return
+     */
+    private static boolean isEmojiCharacter(char codePoint) {
+        boolean isScopeOf = (codePoint == 0x0) || (codePoint == 0x9) || (codePoint == 0xA) || (codePoint == 0xD)
+                || ((codePoint >= 0x20) && (codePoint <= 0xD7FF) && (codePoint != 0x263a))
+                || ((codePoint >= 0xE000) && (codePoint <= 0xFFFD))
+                || ((codePoint >= 0x10000) && (codePoint <= 0x10FFFF));
+        return !isScopeOf;
+
     }
 }

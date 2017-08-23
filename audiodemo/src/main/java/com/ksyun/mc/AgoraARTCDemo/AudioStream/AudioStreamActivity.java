@@ -138,6 +138,7 @@ public class AudioStreamActivity extends Activity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        LoadingDialog.dismissLoadingDialog();
         mStreamer.destroyStream();
         leaveRoom();
         if (mHandler != null) {
