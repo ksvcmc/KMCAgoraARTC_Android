@@ -22,6 +22,7 @@ import com.ksyun.mc.AgoraARTCDemo.ui.NoDoubleClickListener;
 import com.ksyun.mc.AgoraARTCDemo.utils.Constant;
 import com.ksyun.mc.AgoraARTCDemo.utils.DefaultHttpResponseListener;
 import com.ksyun.mc.AgoraARTCDemo.utils.HttpRequest;
+import com.ksyun.mc.agoravrtc.AgoraErrorCode;
 import com.ksyun.mc.agoravrtc.KMCAgoraEventListener;
 import com.ksyun.mc.agoravrtc.KMCAgoraVRTC;
 import com.ksyun.mc.agoravrtc.KMCAuthResultListener;
@@ -160,7 +161,12 @@ public class AudioChatActivity extends Activity {
                     break;
                 case ERROR:
                     mIsRTCRun = false;
-                    makeToast("连麦错误，错误码：" + data[0]);
+                    if(data!= null && data[0] instanceof Integer && (Integer) data[0] == AgoraErrorCode.ERR_LEAVE_CHANNEL_REJECTED){
+                        Log.d(TAG,"还没有加入频道已经退出了");
+                        return;
+                    }else {
+                        makeToast("连麦错误，错误码：" + data[0]);
+                    }
                     break;
                 case LEAVE_CHANNEL:
                     mIsRTCRun = false;
@@ -179,9 +185,9 @@ public class AudioChatActivity extends Activity {
     private void hangupChat() {
         if (mRTCWrapper != null ) {
 //            mRTCWrapper.enableObserver(false);
-            if(mIsRTCRun) { //用户成功加入频道后才可以离开频道
+//            if(mIsRTCRun) { //用户成功加入频道后才可以离开频道
                 mRTCWrapper.leaveChannel();
-            }
+//            }
             mRTCWrapper.release();
             mRTCWrapper = null;
             AudioChatUilts.leaveRoom(mRootName, mUserID, mRoomId, new HttpRequest.HttpResponseListener() {

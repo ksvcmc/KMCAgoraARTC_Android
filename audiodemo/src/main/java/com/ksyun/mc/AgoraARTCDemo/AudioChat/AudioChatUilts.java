@@ -77,6 +77,8 @@ public class AudioChatUilts {
             } catch (UnsupportedEncodingException e) {
                 e.printStackTrace();
             }
+            uri.append("&roomId=");
+            uri.append(roomId);
             httpRequest.execute(uri.toString());
         }
     }
