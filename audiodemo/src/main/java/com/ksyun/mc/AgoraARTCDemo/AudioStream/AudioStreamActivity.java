@@ -46,6 +46,7 @@ public class AudioStreamActivity extends Activity {
     private final static String INTENT_EXTRA = MeLiveInfo.class.getName();
     private final static String ROOM_NAME = "ROOM_NAME";
     private final static String USER_ID = "USER_ID";
+    private final static String ROOM_ID = "ROOM_ID";
 
     private MeLiveInfo mLiveInfo;
     private ImageView mUserImageView;
@@ -55,6 +56,7 @@ public class AudioStreamActivity extends Activity {
     private TextView mTimeTextView;
     private LinearLayout mChatLayoutView;
     private String mRoomName;
+    private String mRoomId;
     private String mUserID;
     private boolean mIsChat;
     private Handler mHandler;
@@ -64,9 +66,10 @@ public class AudioStreamActivity extends Activity {
     private boolean isRemote = false;
 
 
-    public static void startActivity(Context context, String roomName, String userID, MeLiveInfo info) {
+    public static void startActivity(Context context, String roomName,
+                                     String roomId, String userID, MeLiveInfo info) {
         Intent intent = new Intent(context, AudioStreamActivity.class);
-
+        intent.putExtra(ROOM_ID, roomId);
         intent.putExtra(INTENT_EXTRA, info);
         intent.putExtra(ROOM_NAME, roomName);
         intent.putExtra(USER_ID, userID);
@@ -79,6 +82,7 @@ public class AudioStreamActivity extends Activity {
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON, WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         setContentView(R.layout.audio_stream_activity);
         mLiveInfo = getIntent().getParcelableExtra(INTENT_EXTRA);
+        mRoomId = getIntent().getStringExtra(ROOM_ID);
         mRoomName = getIntent().getStringExtra(ROOM_NAME);
         mUserID = getIntent().getStringExtra(USER_ID);
         mIsChat = (mLiveInfo.getUserType() == 1);
@@ -164,7 +168,8 @@ public class AudioStreamActivity extends Activity {
      * 退出房间
      */
     private void leaveRoom() {
-        AudioStreamUilts.leaveRoom(mRoomName, mUserID, new HttpRequest.HttpResponseListener() {
+        AudioStreamUilts.leaveRoom(mRoomName, mUserID, mRoomId,
+                new HttpRequest.HttpResponseListener() {
             @Override
             public void onHttpResponse(int responseCode, String response) {
                 if (responseCode != HttpURLConnection.HTTP_OK) {
@@ -181,7 +186,8 @@ public class AudioStreamActivity extends Activity {
      */
     private void getChatList() {
 
-        AudioStreamUilts.getChatList(mRoomName, new DefaultHttpResponseListener() {
+        AudioStreamUilts.getChatList(mRoomName, mRoomId,
+                new DefaultHttpResponseListener() {
             @Override
             public void onSuccess(MeLiveInfo info) {
                 if(AudioStreamActivity.this.isFinishing()) return;
@@ -196,7 +202,8 @@ public class AudioStreamActivity extends Activity {
                 } else {
                     updateListUser(info.getFansInfos());
                     if (mHandler != null) {
-                        mHandler.postDelayed(new RunGetChatList(AudioStreamActivity.this), Constant.DELAYED_TIME);
+                        mHandler.postDelayed(new RunGetChatList(AudioStreamActivity.this),
+                                Constant.DELAYED_TIME);
                     }
                 }
             }
@@ -206,7 +213,8 @@ public class AudioStreamActivity extends Activity {
                 Log.e(TAG, "getChatList  faile:" + errorCode + ",response:" + message);
                 if(AudioStreamActivity.this.isFinishing()) return;
                 if (mHandler != null) {
-                    mHandler.postDelayed(new RunGetChatList(AudioStreamActivity.this), Constant.DELAYED_TIME);
+                    mHandler.postDelayed(new RunGetChatList(AudioStreamActivity.this),
+                            Constant.DELAYED_TIME);
                 }
             }
         });
@@ -217,7 +225,8 @@ public class AudioStreamActivity extends Activity {
      */
     private void kickUser(String uid) {
         LoadingDialog.showLoadingDialog(AudioStreamActivity.this);
-        AudioStreamUilts.anchorKick(mRoomName, uid, mUserID, new DefaultHttpResponseListener() {
+        AudioStreamUilts.anchorKick(mRoomName, uid, mUserID, mRoomId,
+                new DefaultHttpResponseListener() {
             @Override
             public void onSuccess(MeLiveInfo info) {
                 if(AudioStreamActivity.this.isFinishing()) return;
@@ -244,7 +253,8 @@ public class AudioStreamActivity extends Activity {
         LoadingDialog.showLoadingDialog(AudioStreamActivity.this);
         Log.d(TAG,"unJoinChat,StopRTC");
         mStreamer.stopRTC();
-        AudioStreamUilts.unJoinChat(mRoomName, mUserID, new DefaultHttpResponseListener() {
+        AudioStreamUilts.unJoinChat(mRoomName, mUserID, mRoomId,
+                new DefaultHttpResponseListener() {
             @Override
             public void onSuccess(MeLiveInfo info) {
                 if(AudioStreamActivity.this.isFinishing()) return;
@@ -270,7 +280,8 @@ public class AudioStreamActivity extends Activity {
     private void joinChat() {
         LoadingDialog.showLoadingDialog(AudioStreamActivity.this);
         isRemote = false;
-        AudioStreamUilts.joinChat(mRoomName, mUserID, new DefaultHttpResponseListener() {
+        AudioStreamUilts.joinChat(mRoomName, mUserID, mRoomId,
+                new DefaultHttpResponseListener() {
             @Override
             public void onSuccess(MeLiveInfo info) {
                 if(isFinishing()) return;

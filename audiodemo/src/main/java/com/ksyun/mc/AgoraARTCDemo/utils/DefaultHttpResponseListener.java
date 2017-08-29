@@ -54,6 +54,7 @@ public abstract class DefaultHttpResponseListener implements HttpRequest.HttpRes
                 info.setCreateTime(obj.optLong("createTime", 0));
                 info.setIsClose(obj.optInt("isClose",0));
                 info.setStreamId(obj.optString("streamId",String.valueOf(new Date().getTime())));
+                info.setRoomId(obj.optString("roomId", String.valueOf(new Date().getTime())));
                 onSuccess(info);
 
             } catch (JSONException ex) {

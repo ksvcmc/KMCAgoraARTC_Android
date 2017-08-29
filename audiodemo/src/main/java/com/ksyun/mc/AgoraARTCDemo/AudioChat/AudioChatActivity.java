@@ -38,6 +38,7 @@ import java.util.List;
 public class AudioChatActivity extends Activity {
     private final static String TAG = AudioChatActivity.class.getSimpleName();
     private final static String CHAT_ID_LIST = "CHAT_ID_LIST";
+    private final static String ROOM_ID = "ROOM_ID";
     private final static String ROOM_NAME = "ROOM_NAME";
     private final static String USER_ID = "USER_ID";
     private final static String CHANNEL_NAME ="CHANNEL_NAME";
@@ -47,6 +48,7 @@ public class AudioChatActivity extends Activity {
     private AudioLinkListView mLinkListView;
     private String mRootName;
     private String mUserID;
+    private String mRoomId;
     private String mChannelName;
     private ImageView mChatCloseImageView;
     private ImageView mCloseImageView;
@@ -56,9 +58,11 @@ public class AudioChatActivity extends Activity {
     private boolean mIsRTCRun;
     private KMCAgoraVRTC mRTCWrapper;
 
-    public static void startActivity(Context mContext, String roorName, String userID,String channelName, ArrayList<ChatInfo> chatInfos) {
+    public static void startActivity(Context mContext, String roorName, String roomId, String userID,String channelName,
+                                     ArrayList<ChatInfo> chatInfos) {
         Intent intent = new Intent(mContext, AudioChatActivity.class);
         intent.putParcelableArrayListExtra(AudioChatActivity.CHAT_ID_LIST, chatInfos);
+        intent.putExtra(ROOM_ID, roomId);
         intent.putExtra(ROOM_NAME, roorName);
         intent.putExtra(USER_ID, userID);
         intent.putExtra(CHANNEL_NAME,channelName);
@@ -69,11 +73,13 @@ public class AudioChatActivity extends Activity {
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        getWindow().setFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON, WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+        getWindow().setFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON,
+                WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         setContentView(R.layout.audio_chat_activity);
 
         Intent intent = getIntent();
         mChatIdList = intent.getParcelableArrayListExtra(CHAT_ID_LIST);
+        mRoomId = intent.getStringExtra(ROOM_ID);
         if (mChatIdList == null) mChatIdList = new ArrayList<ChatInfo>();
         mRootName = intent.getStringExtra(ROOM_NAME);
         mUserID = intent.getStringExtra(USER_ID);
@@ -178,7 +184,7 @@ public class AudioChatActivity extends Activity {
             }
             mRTCWrapper.release();
             mRTCWrapper = null;
-            AudioChatUilts.leaveRoom(mRootName, mUserID, new HttpRequest.HttpResponseListener() {
+            AudioChatUilts.leaveRoom(mRootName, mUserID, mRoomId, new HttpRequest.HttpResponseListener() {
                 @Override
                 public void onHttpResponse(int responseCode, String response) {
                     if (responseCode != HttpURLConnection.HTTP_OK) {
@@ -193,7 +199,7 @@ public class AudioChatActivity extends Activity {
      * 查询连麦列表
      */
     private void fetchChatList() {
-        AudioChatUilts.fetchChatList(mRootName, new DefaultHttpResponseListener() {
+        AudioChatUilts.fetchChatList(mRootName, mRoomId, new DefaultHttpResponseListener() {
             @Override
             public void onSuccess(MeLiveInfo info) {
                 if(!AudioChatActivity.this.isFinishing()) {

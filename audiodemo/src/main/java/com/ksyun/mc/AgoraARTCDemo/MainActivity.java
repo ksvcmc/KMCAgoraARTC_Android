@@ -111,11 +111,13 @@ public class MainActivity extends Activity {
         mRoomName = mRoomNameEditText.getText().toString().trim();
         if (mRoomName != null && mRoomName.length() > 0 && mRoomName.length() < 32) {
             LoadingDialog.showLoadingDialog(this);
-            AudioStreamUilts.joinRoom(mRoomName, Utils.getDeviceID(getApplicationContext()), new DefaultHttpResponseListener() {
+            AudioStreamUilts.joinRoom(mRoomName, Utils.getDeviceID(getApplicationContext()),
+                    new DefaultHttpResponseListener() {
                 @Override
                 public void onSuccess(MeLiveInfo info) {
                     if (!MainActivity.this.isFinishing()) {
-                        AudioStreamActivity.startActivity(MainActivity.this, mRoomName, Utils.getDeviceID(MainActivity.this), info);
+                        AudioStreamActivity.startActivity(MainActivity.this, mRoomName,
+                                info.getRoomId(), Utils.getDeviceID(MainActivity.this), info);
                         LoadingDialog.dismissLoadingDialog();
                     }
                 }
@@ -139,12 +141,15 @@ public class MainActivity extends Activity {
         mRoomName = mRoomNameEditText.getText().toString().trim();
         if (mRoomName != null && mRoomName.length() > 0 && mRoomName.length() < 32) {
             LoadingDialog.showLoadingDialog(MainActivity.this);
-            AudioChatUilts.joinRoom(mRoomName, Utils.getDeviceID(getApplicationContext()), new DefaultHttpResponseListener() {
+            AudioChatUilts.joinRoom(mRoomName, Utils.getDeviceID(getApplicationContext()),
+                    new DefaultHttpResponseListener() {
                 @Override
                 public void onSuccess(MeLiveInfo info) {
                     if (!MainActivity.this.isFinishing()) {
                         String channelName = (info.getStreamId() == null) ? mRoomName : info.getStreamId();
-                        AudioChatActivity.startActivity(MainActivity.this, mRoomName, Utils.getDeviceID(MainActivity.this), channelName, (ArrayList<ChatInfo>) info.getFansInfos());
+                        AudioChatActivity.startActivity(MainActivity.this, mRoomName, info.getRoomId(),
+                                Utils.getDeviceID(MainActivity.this), channelName,
+                                (ArrayList<ChatInfo>) info.getFansInfos());
                         LoadingDialog.dismissLoadingDialog();
                     }
                 }

@@ -37,7 +37,8 @@ public class AudioChatUilts {
         }
     }
 
-    public static void leaveRoom(String roomName, String uid, HttpRequest.HttpResponseListener listener) {
+    public static void leaveRoom(String roomName, String uid, String roomId,
+                                 HttpRequest.HttpResponseListener listener) {
         if (listener != null && roomName != null) {
             if (listener != null && roomName != null) {
                 HttpRequest httpRequest = new HttpRequest(listener);
@@ -51,6 +52,7 @@ public class AudioChatUilts {
                 try {
                     parameters.put("roomName", roomName);
                     parameters.put("userId", uid);
+                    parameters.put("roomId", roomId);
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
@@ -59,7 +61,8 @@ public class AudioChatUilts {
         }
     }
 
-    public static void fetchChatList(String roomName, HttpRequest.HttpResponseListener listener) {
+    public static void fetchChatList(String roomName, String roomId,
+                                     HttpRequest.HttpResponseListener listener) {
         if (listener != null && roomName != null) {
             HttpRequest httpRequest = new HttpRequest(listener);
             httpRequest.setConnectTimeout(5000);

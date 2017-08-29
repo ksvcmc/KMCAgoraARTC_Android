@@ -15,19 +15,24 @@ import java.net.URLEncoder;
 
 public class AudioStreamUilts {
 
-    public static void joinRoom(String roomName, String uid, HttpRequest.HttpResponseListener listener) {
-        request("/api/live/join",roomName,uid,listener);
+    public static void joinRoom(String roomName, String uid,
+                                HttpRequest.HttpResponseListener listener) {
+        request("/api/live/join", roomName, uid, listener);
     }
-    public static void leaveRoom(String roomName,String uid,HttpRequest.HttpResponseListener listener){
-        request("/api/live/leave",roomName,uid,listener);
+    public static void leaveRoom(String roomName, String uid, String roomId,
+                                 HttpRequest.HttpResponseListener listener){
+        request("/api/live/leave", roomName, uid, roomId, listener);
     }
-    public static void joinChat(String roomName,String uid,HttpRequest.HttpResponseListener listener){
-        request("/api/live/chat",roomName,uid,listener);
+    public static void joinChat(String roomName,String uid, String roomId,
+                                HttpRequest.HttpResponseListener listener){
+        request("/api/live/chat", roomName, uid, roomId, listener);
     }
-    public static void unJoinChat(String roomName,String uid,HttpRequest.HttpResponseListener listener){
-        request("/api/live/unchat",roomName,uid,listener);
+    public static void unJoinChat(String roomName, String uid, String roomId,
+                                  HttpRequest.HttpResponseListener listener){
+        request("/api/live/unchat", roomName, uid, roomId, listener);
     }
-    public static void anchorKick(String roomName,String uid,String anchorId,HttpRequest.HttpResponseListener listener){
+    public static void anchorKick(String roomName, String uid, String anchorId,
+                                  String roomId, HttpRequest.HttpResponseListener listener){
         if (listener != null && roomName != null && uid != null&&anchorId != null) {
             HttpRequest httpRequest = new HttpRequest(listener);
             httpRequest.setRequestMethod("POST");
@@ -38,20 +43,24 @@ public class AudioStreamUilts {
                 parameters.put("roomName", roomName);
                 parameters.put("userId", uid);
                 parameters.put("anchorId",anchorId);
+                parameters.put("roomId", roomId);
             } catch (JSONException e) {
                 e.printStackTrace();
             }
             httpRequest.execute(uri.toString(), parameters.toString());
         }
     }
-    public static void getChatList(String roomName,HttpRequest.HttpResponseListener listener){
+    public static void getChatList(String roomName, String roomId,
+                                   HttpRequest.HttpResponseListener listener){
         if (listener != null && roomName != null ) {
             HttpRequest httpRequest = new HttpRequest(listener);
             httpRequest.setRequestMethod("GET");
             StringBuilder uri = new StringBuilder(Constant.SERVER_URL);
             uri.append("/api/live/getChatList?roomName=");
             try {
-                uri.append(URLEncoder.encode(roomName,"UTF-8"));
+                uri.append(URLEncoder.encode(roomName, "UTF-8"));
+                uri.append("&roomId=");
+                uri.append(roomId);
             } catch (UnsupportedEncodingException e) {
                 e.printStackTrace();
             }
@@ -59,7 +68,8 @@ public class AudioStreamUilts {
         }
     }
 
-    private static void request(String path,String roomName,String uid,HttpRequest.HttpResponseListener listener){
+    private static void request(String path, String roomName, String uid,
+                                HttpRequest.HttpResponseListener listener) {
         if (listener != null && roomName != null && uid != null) {
             HttpRequest httpRequest = new HttpRequest(listener);
             httpRequest.setRequestMethod("POST");
@@ -76,4 +86,22 @@ public class AudioStreamUilts {
         }
     }
 
+    private static void request(String path, String roomName, String uid,
+                                String roomId, HttpRequest.HttpResponseListener listener) {
+        if (listener != null && roomName != null && uid != null) {
+            HttpRequest httpRequest = new HttpRequest(listener);
+            httpRequest.setRequestMethod("POST");
+            StringBuilder uri = new StringBuilder(Constant.SERVER_URL);
+            uri.append(path);
+            JSONObject parameters = new JSONObject();
+            try {
+                parameters.put("roomName", roomName);
+                parameters.put("userId", uid);
+                parameters.put("roomId", roomId);
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+            httpRequest.execute(uri.toString(), parameters.toString());
+        }
+    }
 }
