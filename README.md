@@ -19,7 +19,10 @@ compile 'com.ksyun.media:libksylive-x86:2.3.0'
 
 本sdk使用简单，初次使用需要在魔方服务后台申请token，用于客户鉴权，使用下面的接口鉴权
 ```java
-void authorize(String token, KMCAuthResultListener listener)
+/**
+  * @enableVideo 是否开启视频连麦
+  */
+void authorize(String token, boolean enableVideo,  KMCAuthResultListener listener)
 ```
 
 加入一个频道
@@ -39,6 +42,11 @@ void joinChannel(String channel, int uid)
 void leaveChannel()
 ```
 
+在不使用连麦时，需要清理所有资源
+
+```java
+void release()
+```
 本地视频数据使用下面的接口发送到远端
 
 ```java
