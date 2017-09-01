@@ -3,7 +3,12 @@
 ## 项目背景
 金山魔方是一个多媒体能力提供平台，通过统一接入API、统一鉴权、统一计费等多种手段，降低客户接入多媒体处理能力的代价，提供多媒体能力供应商的效率。  
 本文档主要针对视频连麦功能而说明
-
+## 效果展示
+![Alt text](https://raw.githubusercontent.com/wiki/ksvcmc/KMCAgoraARTC_iOS/img.jpg)
+## 鉴权
+SDK在使用时需要用token进行鉴权后方可使用，token申请方式见**接入步骤**部分;  
+token与应用包名为一一对应的关系;  
+鉴权错误码见：https://github.com/ksvcmc/KMCAgoraVRTC_Android/wiki/auth_error
 ## 目录结构
 **demo**示例工程
 **demo/libs**魔方sdk包libkmcagoravrtc.jar，以及声网sdk包
